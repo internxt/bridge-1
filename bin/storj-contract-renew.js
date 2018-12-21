@@ -27,7 +27,7 @@ const network = complex.createClient(config.complex);
 const cursor = storage.models.Shard.find({
   'contracts.contract.store_end': {
     $gte: NOW,
-    $lte: NOW + HOURS_24
+    $lte: NOW + HOURS_24*7
   }
 }).cursor();
 const counter = { processed: 0, renewed: 0, errored: 0, errors: [] };
@@ -75,7 +75,7 @@ function handleCursorData(shard) {
   }
 
   let renewalContracts = needsRenewal.map(([nodeId, contract]) => {
-    contract.set('store_end', NOW + ms('90d'));
+    contract.set('store_end', NOW + ms('365d'));
 
     return [nodeId, contract];
   });

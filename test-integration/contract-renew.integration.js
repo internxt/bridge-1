@@ -92,7 +92,7 @@ describe('ContractRenewalJob', function() {
           contract: {
             data_hash: storj.utils.rmd160('shard1'),
             store_begin: NOW,
-            store_end: NOW + ms('90d')
+            store_end: NOW + ms('365d')
           }
         }
       ]
