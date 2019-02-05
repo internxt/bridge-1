@@ -1,5 +1,3 @@
-_**Notice**: Development on bridge is deprecated as we continue our v3 rearchitecture. Please see https://github.com/storj/storj for ongoing v3 development._
-
 [![Storj Bridge](https://nodei.co/npm/storj-bridge.png?downloads=true)](https://storj.github.io/bridge)
 =======================================================================================================
 
@@ -8,14 +6,6 @@ _**Notice**: Development on bridge is deprecated as we continue our v3 rearchite
 [![NPM](https://img.shields.io/npm/v/storj-bridge.svg?style=flat-square)](https://www.npmjs.com/package/storj-bridge)
 [![GitHub license](https://img.shields.io/badge/license-AGPLv3-blue.svg?style=flat-square)](https://raw.githubusercontent.com/Storj/data-api/master/LICENSE)
 
-Access the [Storj](https://storj.io) network via simple REST API.
-
-Running Your Own Bridge
------------------------
-
-If you're planning to run your own bridge in production, mainnet, there are several issues that need to be addressed before this use case will be better supported. The largest of the issues is that there are several manual processes that will need to be run including running monthly payouts to farmers as well as communicating with farmers to add a new "trusted key" for the bridge. Decentralized bridges is described in the [Storj whitepaper](https://storj.io/storj.pdf) *(a.k.a Federated Bridges)* and is an area of ongoing research. There are also several [Storj Improvement Proposals](https://github.com/storj/sips) to streamline these processes using Ethereum smart contracts.
-
-Aside from those issues, running a bridge within a private network is currently an option as those will not be issues in that environment. Please see https://github.com/storj/storj-sdk and https://github.com/storj/integration for quick setup of an entire Storj network.
 
 Quick Start
 -----------
