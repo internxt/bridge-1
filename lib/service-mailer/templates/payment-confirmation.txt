@@ -1,0 +1,11 @@
+Thank you for your payment!
+===========================
+
+Good news! Your payment of ${{amount}} has been processed.
+
+Thanks for all your support!
+
+---
+
+Cheers,
+The Storj Team

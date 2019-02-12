@@ -1,0 +1,13 @@
+Hello from the Storj team!
+==========================
+
+You have a new invoice from Storj Labs for ${{amount}}.
+
+You used {{storage}}GB of storage and {{bandwidth}}GB of bandwidth this month.
+
+Thanks for using Storj!
+
+---
+
+Cheers,
+The Storj Team

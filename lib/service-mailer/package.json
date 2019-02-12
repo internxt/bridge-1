@@ -1,0 +1,36 @@
+{
+  "name": "storj-service-mailer",
+  "version": "1.4.0",
+  "description": "email dispatcher and templates for storj services",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/**"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Storj/service-mailer.git"
+  },
+  "keywords": [
+    "storj",
+    "service",
+    "mailer",
+    "templates"
+  ],
+  "author": "Gordon Hall <gordon@storj.io>",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/Storj/service-mailer/issues"
+  },
+  "homepage": "https://github.com/Storj/service-mailer#readme",
+  "dependencies": {
+    "async": "^2.0.1",
+    "handlebars": "^4.0.5",
+    "nodemailer": "^2.6.4"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.0.2",
+    "proxyquire": "^1.7.10",
+    "sinon": "^1.17.6"
+  }
+}
