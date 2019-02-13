@@ -1,4 +1,4 @@
-[![Internxt Bridge]
+Internxt Bridge
 =======================================================================================================
 
 [![Build Status](https://img.shields.io/travis/Internxt/bridge.svg?style=flat-square)](https://travis-ci.org/Storj/bridge)
