@@ -87,7 +87,7 @@
     "storj-service-error-types": "^1.4.0",
     "storj-service-mailer": "internxt/Mailer",
     "storj-service-middleware": "^1.3.3",
-    "storj-service-storage-models": "^10.6.0",
+    "storj-service-storage-models": "internxt/service-storage-models",
     "through": "^2.3.8"
   }
 }
