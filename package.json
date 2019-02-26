@@ -86,7 +86,7 @@
     "storj-lib": "internxt/core",
     "storj-mongodb-adapter": "internxt/mongodb-adapter",
     "storj-service-error-types": "internxt/service-error-types",
-    "storj-service-mailer": "internxt/ailer",
+    "storj-service-mailer": "internxt/mailer",
     "storj-service-middleware": "internxt/service-middleware",
     "storj-service-storage-models": "internxt/service-storage-models",
     "stripe": "^6.20.1",
