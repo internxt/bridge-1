@@ -81,14 +81,15 @@
     "redis": "^2.7.1",
     "scrypt": "^6.0.3",
     "secp256k1": "^3.3.0",
-    "storj-analytics": "^1.0.0",
-    "storj-complex": "internxt/core",
+    "storj-analytics": "internxt/inxt-analytics",
+    "storj-complex": "internxt/complex",
     "storj-lib": "internxt/core",
-    "storj-mongodb-adapter": "internxt/mongo-adapter",
+    "storj-mongodb-adapter": "internxt/mongodb-adapter",
     "storj-service-error-types": "internxt/service-error-types",
     "storj-service-mailer": "internxt/mailer",
     "storj-service-middleware": "internxt/service-middleware",
     "storj-service-storage-models": "internxt/service-storage-models",
+    "stripe": "^6.25.1",
     "through": "^2.3.8"
   }
 }
