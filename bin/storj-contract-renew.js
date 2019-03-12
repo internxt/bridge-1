@@ -20,14 +20,14 @@ const HOURS_24 = ms('24h');
 
 const logger = require('kad-logger-json')(0);
 const config = new Config(process.env.NODE_ENV || 'develop', program.config,
-                          program.datadir);
+  program.datadir);
 const { mongoUrl, mongoOpts } = config.storage;
 const storage = new Storage(mongoUrl, mongoOpts, { logger });
 const network = complex.createClient(config.complex);
 const cursor = storage.models.Shard.find({
   'contracts.contract.store_end': {
     $gte: NOW,
-    $lte: NOW + HOURS_24*7
+    $lte: NOW + HOURS_24 * 7
   }
 }).cursor();
 const counter = { processed: 0, renewed: 0, errored: 0, errors: [] };
@@ -90,7 +90,7 @@ function lookupFarmer([nodeId, contract], next) {
       return next(null, null);
     }
 
-    next(null , [storj.Contact(contact.toObject()), contract]);
+    next(null, [storj.Contact(contact.toObject()), contract]);
   });
 }
 
@@ -98,7 +98,7 @@ function maybeRenewContracts(err, results) {
   let canBeRenewed = results.filter((result) => !!result);
 
   async.eachLimit(canBeRenewed, 6, checkIfNeedsRenew,
-                  () => cursor.resume());
+    () => cursor.resume());
 }
 
 function finishProcessingContract(done) {
@@ -149,7 +149,7 @@ function getParentBucketEntries(frames, next) {
 function updateContractRecord(contact, updatedContract, next) {
   storage.models.Shard.findOne({
     hash: updatedContract.get('data_hash')
-  }, function(err, shard) {
+  }, function (err, shard) {
     if (err) {
       return next(err);
     }

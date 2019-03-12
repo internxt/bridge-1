@@ -13,7 +13,7 @@ program.parse(process.argv);
 var config = new Config(program.config);
 var monitor = new Monitor(config);
 
-monitor.start(function(err) {
+monitor.start(function (err) {
   if (err) {
     console.log(err);
   }
