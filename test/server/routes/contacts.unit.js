@@ -135,10 +135,12 @@ describe('ContactsRouter', function() {
           spaceAvailable: false
         });
         expect(findOneAndUpdate.callCount).to.equal(1);
+
         expect(findOneAndUpdate.args[0][1]).to.eql({
           $set: {
-            address: '127.0.0.1',
             lastSeen: 0,
+            address: '127.0.0.1',
+            ip: '127.0.0.1',
             port: 9000,
             spaceAvailable: false
           }
