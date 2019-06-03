@@ -90,6 +90,7 @@
     "storj-service-middleware": "internxt/service-middleware",
     "storj-service-storage-models": "internxt/service-storage-models",
     "stripe": "^6.25.1",
-    "through": "^2.3.8"
+    "through": "^2.3.8",
+    "winston": "^3.2.1"
   }
 }
