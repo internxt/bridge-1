@@ -17,7 +17,7 @@ describe('ReportsRouter', function() {
   );
 
   describe('#createExchangeReport', function() {
-    var sandbox = sinon.sandbox.create();
+    var sandbox = sinon.createSandbox();
     afterEach(function() {
       sandbox.restore();
     });
@@ -308,7 +308,7 @@ describe('ReportsRouter', function() {
   });
 
   describe('#_triggerMirrorEstablish', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     const n = constants.M_REPLICATE;

@@ -30,7 +30,7 @@ describe('Engine', function() {
   });
 
   describe('#_countPendingResponses', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     it('will return pending count', function() {
@@ -59,7 +59,7 @@ describe('Engine', function() {
   });
 
   describe('#_logHealthInfo', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     /* jshint ignore:start */ // ignore for too many function statements
@@ -156,7 +156,7 @@ describe('Engine', function() {
   });
 
   describe('#start', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     it('should setup storage, mailer, server', function(done) {
@@ -196,7 +196,7 @@ describe('Engine', function() {
   });
 
   describe('#_configureApp', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     it('it should use middleware error handler', function(done) {

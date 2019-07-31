@@ -103,7 +103,7 @@ describe('POW Middleware', function() {
   });
 
   describe('#checkInitTarget', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     beforeEach(function() {
       redis.del('contact-stats');
     });
@@ -152,7 +152,7 @@ describe('POW Middleware', function() {
     const moreTarget = '00008020c470b2c58f96b6655747ba7ec17c0bbf25f0299e34081a55c1a88168';
     const lessTarget = '000200831243a46f8b7e22f09add3b84e6593ad9c5aea066e841726623f65458';
 
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
 
     beforeEach(function() {
       clock = sandbox.useFakeTimers();
@@ -254,7 +254,7 @@ describe('POW Middleware', function() {
     let clock = null;
     const count = 1000;
     const startTarget = '0000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     const opts = {
       retargetPeriod: 1000,
       retargetCount: 500

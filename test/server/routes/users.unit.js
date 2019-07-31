@@ -64,7 +64,7 @@ describe('UsersRouter', function() {
   });
 
   describe('#createUser', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     beforeEach(function () {
       sandbox.stub(analytics, 'track');
       sandbox.stub(analytics, 'identify');
@@ -308,7 +308,7 @@ describe('UsersRouter', function() {
   });
 
   describe('#confirmActivateUser', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     beforeEach(function () {
       sandbox.stub(analytics, 'track');
       sandbox.stub(analytics, 'identify');

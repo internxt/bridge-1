@@ -70,7 +70,7 @@ describe('PubkeysRouter', function() {
   });
 
   describe('#addPublicKey', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     beforeEach(() => sandbox.stub(analytics, 'track'));
     afterEach(() => sandbox.restore());
 
@@ -156,7 +156,7 @@ describe('PubkeysRouter', function() {
   });
 
   describe('#destroyPublicKey', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     beforeEach(() => sandbox.stub(analytics, 'track'));
     afterEach(() => sandbox.restore());
 

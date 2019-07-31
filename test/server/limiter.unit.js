@@ -11,7 +11,7 @@ const errors = require('storj-service-error-types');
 let sandbox;
 
 beforeEach(() => {
-  sandbox = sinon.sandbox.create();
+  sandbox = sinon.createSandbox();
 });
 
 afterEach(() => sandbox.restore());

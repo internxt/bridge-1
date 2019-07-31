@@ -26,7 +26,7 @@ describe('BucketsRouter', function() {
   someUser.recordDownloadBytes = sinon.stub().callsArg(1);
 
   describe('#_usetokenOrVerify', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     it('will fallback to use auth middlewares', function(done) {
@@ -330,7 +330,7 @@ describe('BucketsRouter', function() {
 
 
   describe('#getBucketId', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     it('give internal error', function(done) {
@@ -412,7 +412,7 @@ describe('BucketsRouter', function() {
   });
 
   describe('#createBucket', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     beforeEach(() => sandbox.stub(analytics, 'track'));
     afterEach(() => sandbox.restore());
 
@@ -536,9 +536,12 @@ describe('BucketsRouter', function() {
   });
 
   describe('#destroyBucketById', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     beforeEach(() => sandbox.stub(analytics, 'track'));
     afterEach(() => sandbox.restore());
+    after(() => {
+      process.exit(4);
+    });
 
     it('should internal error if query fails', function(done) {
       var request = httpMocks.createRequest({
@@ -1164,7 +1167,7 @@ describe('BucketsRouter', function() {
   });
 
   describe('#createBucketToken', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     beforeEach(() => sandbox.stub(analytics, 'track'));
     afterEach(() => sandbox.restore());
 
@@ -1446,7 +1449,7 @@ describe('BucketsRouter', function() {
   });
 
   describe('#createEntryFromFrame', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     beforeEach(() => sandbox.stub(analytics, 'track'));
     afterEach(() => sandbox.restore());
 
@@ -2314,7 +2317,7 @@ describe('BucketsRouter', function() {
   });
 
   describe('#_getRetrievalToken', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     it('should internal error if contract cannot load', function(done) {
@@ -2639,7 +2642,7 @@ describe('BucketsRouter', function() {
   });
 
   describe('#_getPointersFromEntry', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     it('should internal error if query fails', function(done) {
@@ -2926,7 +2929,7 @@ describe('BucketsRouter', function() {
   });
 
   describe('#getFile', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     beforeEach(() => sandbox.stub(analytics, 'track'));
     afterEach(() => sandbox.restore());
 
@@ -3399,7 +3402,7 @@ describe('BucketsRouter', function() {
   });
 
   describe('#listMirrorsForFile', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     it('should return the mirrors for the file', function(done) {
@@ -3795,7 +3798,7 @@ describe('BucketsRouter', function() {
   });
 
   describe('#listFilesInBucket', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     it('should internal error if bucket query fails', function(done) {
@@ -3956,7 +3959,7 @@ describe('BucketsRouter', function() {
   });
 
   describe('#removeFile', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     it('should internal error if bucket query fails', function(done) {
@@ -4239,7 +4242,7 @@ it('should throw error on storage event save failure', function(done) {
   });
 
   describe('#getFileId', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     it('should give internal error', function(done) {

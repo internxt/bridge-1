@@ -12,7 +12,7 @@ const analytics = require('storj-analytics');
 
 describe('FramesRouter', function() {
 
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
 
   afterEach(() => sandbox.restore());
 
@@ -27,7 +27,7 @@ describe('FramesRouter', function() {
   someUser.recordUploadBytes = sinon.stub().callsArg(1);
 
   describe('#createFrame', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     beforeEach(() => sandbox.stub(analytics, 'track'));
     afterEach(() => sandbox.restore());
 
@@ -133,7 +133,7 @@ describe('FramesRouter', function() {
   });
 
   describe('#_selectFarmers', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     it('will handle error from contact query', function(done) {
@@ -182,7 +182,7 @@ describe('FramesRouter', function() {
   });
 
   describe('#_publishContract', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     it('will create item on error (e.g. no contract)', function(done) {
@@ -324,7 +324,7 @@ describe('FramesRouter', function() {
   });
 
   describe('#_getContractForShard', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     it('should callback with error if no offer received', function(done) {
@@ -457,7 +457,7 @@ describe('FramesRouter', function() {
 
   describe('#addShardToFrame', function() {
     /* jshint maxstatements: 100 */
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     beforeEach(() => sandbox.stub(analytics, 'track'));
     afterEach(() => sandbox.restore());
 

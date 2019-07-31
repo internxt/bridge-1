@@ -15,7 +15,7 @@ const log = require('../../lib/logger');
 
 describe('Monitor', function() {
 
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
   beforeEach(() => {
     sandbox.stub(fs, 'existsSync').returns(true);
     sandbox.stub(fs, 'writeFileSync');
@@ -349,7 +349,7 @@ describe('Monitor', function() {
   });
 
   describe('#_transferShard', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     it('will handle an invalid contract', function(done) {
@@ -520,7 +520,7 @@ describe('Monitor', function() {
   });
 
   describe('#_replicateShard', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     it('it will fetch sources and destinations', function(done) {
@@ -564,7 +564,7 @@ describe('Monitor', function() {
   });
 
   describe('#_replicateFarmer', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     it('it will log on error', function(done) {
@@ -691,7 +691,11 @@ describe('Monitor', function() {
           Shard: {
             find: sandbox.stub().returns({
               cursor: sandbox.stub().returns(cursor)
-            })
+            }),
+            update: () => {}
+          },
+          Mirror: {
+            deleteMany: () => {}
           }
         }
       };

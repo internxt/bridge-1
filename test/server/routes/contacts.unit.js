@@ -93,7 +93,7 @@ describe('ContactsRouter', function() {
   });
 
   describe('#patchContactByNodeID', function() {
-    const sandbox = sinon.sandbox.create();
+    const sandbox = sinon.createSandbox();
     sandbox.useFakeTimers(new Date(0).getTime());
     afterEach(() => sandbox.restore());
 

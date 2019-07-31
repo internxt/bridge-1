@@ -8,7 +8,7 @@ const secp256k1 = require('secp256k1');
 const auth = require('../../../lib/server/middleware/farmer-auth');
 
 describe('Farmer Authentication Middleware', function() {
-  const sandbox = sinon.sandbox.create();
+  const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.restore());
 
   describe('#authFarmer', function() {

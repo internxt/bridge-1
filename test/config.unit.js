@@ -29,7 +29,7 @@ describe('Config', function() {
   });
 
   describe('@constructor', function() {
-    var sandbox = sinon.sandbox.create();
+    var sandbox = sinon.createSandbox();
 
     before(function() {
       if (fs.existsSync(path.join(CONFDIR, '__tmptest'))) {
