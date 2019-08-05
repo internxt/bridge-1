@@ -1,7 +1,7 @@
 'use strict';
 
 const storj = require('storj-lib');
-const Logger = require('kad-logger-json');
+const Logger = require('../lib/logger');
 const path = require('path');
 const async = require('async');
 const Config = require('../lib/config');

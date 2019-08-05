@@ -18,7 +18,7 @@ program.parse(process.argv);
 const NOW = Date.now();
 const HOURS_24 = ms('24h');
 
-const logger = require('kad-logger-json')(0);
+const logger = require('../lib/logger')(0);
 const config = new Config(process.env.NODE_ENV || 'develop', program.config,
   program.datadir);
 const { mongoUrl, mongoOpts } = config.storage;

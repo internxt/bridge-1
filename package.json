@@ -70,7 +70,6 @@
     "hat": "0.0.3",
     "helmet": "^3.20.0",
     "is-ip": "^2.0.0",
-    "kad-logger-json": "^0.1.2",
     "knuth-shuffle": "^1.0.1",
     "merge": "^1.2.1",
     "mime-db": "^1.40.0",
