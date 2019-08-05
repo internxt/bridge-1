@@ -885,7 +885,7 @@ describe('Monitor', function() {
       expect(recordTimeoutFailure.callCount).to.equal(2);
       expect(save.callCount).to.equal(2);
 
-      expect(log.info.callCount).to.equal(2);
+      expect(log.info.callCount).to.equal(3);
       expect(log.warn.callCount).to.equal(1);
       expect(log.warn.args[0][1])
         .to.equal('7b8b30132e930c7827ee47efebfb197d6a3246d4');
