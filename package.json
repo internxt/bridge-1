@@ -54,7 +54,7 @@
     "proxyquire": "^1.7.10",
     "redis-mock": "^0.16.0",
     "rimraf": "^2.6.3",
-    "sinon": "^7.3.2"
+    "sinon": "^7.4.1"
   },
   "dependencies": {
     "analytics-node": "^2.4.0",
