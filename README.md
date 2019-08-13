@@ -19,9 +19,9 @@ apt-get install mongodb redis-server git wget
 Install NVM, Node.js and NPM:
 
 ```
-wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.30.1/install.sh | bash
+wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
 source ~/.profile
-nvm install --lts
+nvm install 8.15
 ```
 
 Clone the repository, install dependencies:
@@ -41,7 +41,7 @@ NODE_ENV=develop internxt-bridge
 > instead must communicate with a running 
 > [Internxt Complex](https://github.com/Internxt/complex) instance.
 
-This will use the configuration file located at `~/.internxt-bridge/config/develop.json`.
+This will use the configuration file located at `~/.storj-bridge/config/develop.json`.
 
 Windows
 -------
