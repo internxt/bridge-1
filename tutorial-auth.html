@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Storj Bridge Index</title>
+	<title>Storj Bridge Tutorial: API Authentication</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -80,90 +80,94 @@
 <div class="row">
 
 	
-	<div class="col-md-8">
+	<div class="col-md-12">
 	
 		<div id="main">
-			
+			<section class="tutorial-section">
 
-	
-	
+<header>
+    
 
+    <h2>API Authentication</h2>
+</header>
 
-
-
-
-
-
-
-
-
-
-	
-	
-
-
-
-
-
-    <section class="readme-section">
-        <article><h1>Internxt Bridge</h1>
-<p><a href="https://travis-ci.org/Storj/bridge"><img src="https://img.shields.io/travis/Internxt/bridge.svg?style=flat-square" alt="Build Status"></a>
-<a href="https://coveralls.io/r/Storj/bridge"><img src="https://img.shields.io/coveralls/Internxt/bridge.svg?style=flat-square" alt="Coverage Status"></a>
-<a href="https://www.npmjs.com/package/internxt-bridge"><img src="https://img.shields.io/npm/v/internxt-bridge.svg?style=flat-square" alt="NPM"></a>
-<a href="https://raw.githubusercontent.com/Internxt/data-api/master/LICENSE"><img src="https://img.shields.io/badge/license-AGPLv3-blue.svg?style=flat-square" alt="GitHub license"></a></p>
-<h2>Quick Start</h2>
-<p>Install MongoDB, Git and Wget:</p>
-<pre class="prettyprint source"><code>apt-get install mongodb redis-server git wget
+<article>
+    <p>Bridge understands 3 methods for authentication, which can vary depending on
+the operation you wish to perform.</p>
+<h3>HTTP Basic</h3>
+<p>HTTP Basic authentication is supported as a fallback for situations where key
+management is not available or specifically for use before a public key has
+been associated with your user account.</p>
+<p>Your <code>username</code> should simply be your registered email address.</p>
+<p>Your <code>password</code> should be the SHA-256 hash of your password.</p>
+<h3>ECDSA Signatures</h3>
+<p>Once you have added a public ECDSA key to your account, you can use your
+private key to sign messages to the server to avoid sending your credentials in
+every request. This is the recommended authentication method.</p>
+<p>The string that you are expected to sign differs depending on the type of
+request. For POST, PUT, and PATCH requests, you must sign the JSON encoded body
+of the request. For GET, DELETE, and OPTIONS requests, you must sign the raw
+query string parameters.</p>
+<p>In addition to the parameters required for each individual request, you must
+also include a <code>__nonce</code> parameter. This value should be a string and must be
+unique with every request. A common practice is to simply use UUID v4.</p>
+<p>In addition to the request parameters and nonce, you will also sign the HTTP
+method and request path. Ultimately the string you will sign will be:</p>
+<pre class="prettyprint source"><code>&lt;METHOD>\n&lt;PATH>\n&lt;PARAMS>
 </code></pre>
-<p>Install NVM, Node.js and NPM:</p>
-<pre class="prettyprint source"><code>wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
-source ~/.profile
-nvm install 8.15
+<p>For example, to generate a signature for creating a new storage bucket, you
+will sign:</p>
+<pre class="prettyprint source"><code>POST\n/buckets\n{&quot;storage&quot;:10,&quot;transfer&quot;:30,&quot;name&quot;:&quot;MyBucket&quot;,&quot;__nonce&quot;:1453222669376}
 </code></pre>
-<p>Clone the repository, install dependencies:</p>
-<pre class="prettyprint source"><code>git clone https://github.com/Internxt/bridge.git && cd bridge
-npm install && npm link
+<p>This tells the server that at Tue Jan 19 2016 11:57:49 GMT-0500 (EST), you
+authorized a request to created a bucket called &quot;MyBucket&quot; with 10GB of capacity
+and 30GB of transfer. This request cannot be replayed, since the nonce cannot
+be reused.</p>
+<p>Once you have generated the signature, it must be encoded as HEX and included
+in the <code>x-signature</code> header.</p>
+<p>In addition you must supply the public key for verifying the signature in the
+<code>x-pubkey</code> header.</p>
+<p>Bridge will first lookup the user account to which the supplied public key is
+registered and then use it to verify the signature.</p>
+<h3>OpenSSL Example</h3>
+<p>Create ECDSA private key and print out public key</p>
+<pre class="prettyprint source"><code>openssl ecparam -genkey -name secp256k1 -noout -outform DER -out private.key
+openssl ec -inform DER -in private.key -noout -text
 </code></pre>
-<p>Start the server (set the <code>NODE_ENV</code> environment variable to specify the config):</p>
-<pre class="prettyprint source"><code>NODE_ENV=develop internxt-bridge
+<p>Register public key (HTTP basic auth)</p>
+<pre class="prettyprint source"><code>curl -u user:password -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{ &quot;key&quot;: &quot;043874de22536decc5508257cc806a9e5af5e8be6a80056843d5c0c2b112903430f9a46c128ca17e30e2fb54f541416185dda2df878adbb90d66811452f4162125&quot; }' 'https://api.storj.io/keys'
 </code></pre>
-<blockquote>
-<p><strong>Note:</strong> Internxt Bridge cannot communicate with the network on it's own, but
-instead must communicate with a running
-<a href="https://github.com/Internxt/complex">Internxt Complex</a> instance.</p>
-</blockquote>
-<p>This will use the configuration file located at <code>~/.storj-bridge/config/develop.json</code>.</p>
-<h2>Windows</h2>
-<p>Install utilizing automated script</p>
-<pre class="prettyprint source"><code>https://github.com/Storj/storj-automation/archive/master.zip
+<p>Generate signature and use it for POST API call</p>
+<pre class="prettyprint source"><code>printf &quot;POST\n/buckets\n{\&quot;storage\&quot;:10,\&quot;transfer\&quot;:30,\&quot;name\&quot;:\&quot;MyBucket\&quot;,\&quot;__nonce\&quot;:1453222669376}&quot; | openssl dgst -sha256 -hex -sign private.key -keyform DER
+curl --header &quot;x-signature:3046022100e5b534eba11f19d4e3e92398e4ffdf8195041a7de13a1ffe8eb3baf66eb694b8022100982837e3b449fc9e4524009acd03800abf6447cf225a83d6f21bfa67a8326465&quot; --header &quot;x-pubkey:043874de22536decc5508257cc806a9e5af5e8be6a80056843d5c0c2b112903430f9a46c128ca17e30e2fb54f541416185dda2df878adbb90d66811452f4162125&quot; -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{&quot;storage&quot;:10,&quot;transfer&quot;:30,&quot;name&quot;:&quot;MyBucket&quot;,&quot;__nonce&quot;:1453222669376}' 'https://api.storj.io/buckets'
 </code></pre>
-<p>The default configuration can be modified as needed.  It is located at</p>
-<pre class="prettyprint source"><code>%USERPROFILE%\.storj-bridge\config
+<p>Generate signature and use it for GET API call</p>
+<pre class="prettyprint source"><code>printf &quot;GET\n/buckets\n__nonce=1453222669376&quot; | openssl dgst -sha256 -hex -sign private.key -keyform DER
+curl --header &quot;x-signature:304602210099eeb8f525ea1b1f385b8c3caba43a3e1efcc8fd839e8887528dd2fd6a4ae56b022100dfd0b7501d7fba047788fe0aef4d4868c8c493568f469d2cb42ecc998ad97ad6&quot; --header &quot;x-pubkey:04bb548b98f7d11d07384187fbdefc21f5c28b88c00ad0f1d3245e80d5f168273261558d4699f0a7d5cf2a82f937b50fe3f1c234256bb2d9f5e996e86576dc2d73&quot; -X GET 'https://api.storj.io/buckets?__nonce=1453222669376'
 </code></pre>
-<h2>Terms</h2>
-<p>This software is released for testing purposes only. We make no guarantees with
-respect to its function. By using this software you agree that Internxt is not
-liable for any damage to your system. You also agree not to upload illegal
-content, content that infringes on other's IP, or information that would be
-protected by HIPAA, FERPA, or any similar standard. Generally speaking, you
-agree to test the software responsibly. We'd love to hear feedback too.</p></article>
-    </section>
+<h3>Single Use Tokens</h3>
+<p>There are 2 cases where signing the request body is not efficient for the client
+and verifying the signature is not efficient for the server. This is when the
+user wishes to push or pull data to or from a bucket.</p>
+<p>If a file is quite large, the server would have to buffer it's entire contents
+in order to verify the signature. This is where single-use tokens come into
+play.</p>
+<p>Instead of signing the upload request, you sign a request for a <code>token</code> that
+corresponds to a bucket, then use that token in the <code>x-token</code> header in your
+upload request. This also provides a way for users to grant access to others to
+upload files to their bucket by generating a token for them (since anyone with
+the token may upload the file to the bucket).</p>
+<p>Tokens can be configured to expire (default is 5 minutes) and may only be used
+once.</p>
+</article>
 
-
-
-
-
-
+</section>
 
 		</div>
 	</div>
 
 	<div class="clearfix"></div>
 
-	
-		<div class="col-md-3">
-			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
-		</div>
 	
 
 </div>

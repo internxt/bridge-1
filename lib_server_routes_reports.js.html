@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Storj Bridge Source: lib/server/routes/reports.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<script src="scripts/highlight.min.js"></script>
+
+	<link type="text/css" rel="stylesheet" href="styles/site.storj.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" style="background-image:url(img/storj-bridge.svg)"  href="index.html">Storj Bridge</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-storj-bridge.html">storj-bridge</a></li><li><a href="module-storj-bridge_constants.html">storj-bridge/constants</a></li><li><a href="module-storj-bridge_logger.html">storj-bridge/logger</a></li><li><a href="module-storj-bridge_utils.html">storj-bridge/utils</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="BucketsRouter.html">BucketsRouter</a></li><li><a href="Config.html">Config</a></li><li><a href="ContactsRouter.html">ContactsRouter</a></li><li><a href="Engine.html">Engine</a></li><li><a href="FramesRouter.html">FramesRouter</a></li><li><a href="PublicKeysRouter.html">PublicKeysRouter</a></li><li><a href="ReportsRouter.html">ReportsRouter</a></li><li><a href="Router.html">Router</a></li><li><a href="Server.html">Server</a></li><li><a href="StripeRouter.html">StripeRouter</a></li><li><a href="UsersRouter.html">UsersRouter</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="tutorial-auth.html">API Authentication</a></li><li><a href="tutorial-config_.html">Configuring the Bridge</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#Cleaner">Cleaner</a></li><li><a href="global.html#Monitor">Monitor</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+		<div class="col-sm-3 col-md-4">
+            <form class="navbar-form" role="search">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                    <div class="input-group-btn">
+                        <button class="btn btn-primary" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: lib/server/routes/reports.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript ">'use strict';
+
+const Router = require('./index');
+const log = require('../../logger');
+const middleware = require('storj-service-middleware');
+const errors = require('storj-service-error-types');
+const inherits = require('util').inherits;
+const BucketsRouter = require('./buckets');
+const constants = require('../../constants');
+const async = require('async');
+const storj = require('storj-lib');
+const limiter = require('../limiter').DEFAULTS;
+const utils = require('../../utils');
+
+/**
+ * Handles endpoints for reporting
+ * @constructor
+ * @extends {Router}
+ */
+function ReportsRouter(options) {
+  if (!(this instanceof ReportsRouter)) {
+    return new ReportsRouter(options);
+  }
+
+  Router.apply(this, arguments);
+
+  this.getLimiter = middleware.rateLimiter(options.redis);
+}
+
+inherits(ReportsRouter, Router);
+
+/**
+ * Creates an exchange report
+ * @param {http.IncomingMessage} req
+ * @param {http.ServerResponse} res
+ * @param {Function} next
+ */
+ReportsRouter.prototype.createExchangeReport = function (req, res, next) {
+  const self = this;
+  var exchangeReport = new this.storage.models.ExchangeReport(req.body);
+  var projection = {
+    hash: true,
+    contracts: true
+  };
+
+  this.storage.models.Shard.find({
+    hash: exchangeReport.dataHash
+  }, projection, function (err, shards) {
+    if (err) {
+      return next(new errors.InternalError(err.message));
+    }
+
+    if (!shards || !shards.length) {
+      return next(new errors.NotFoundError('Shard not found for report'));
+    }
+
+    // TODO: Add signature/identity verification
+
+    // NB: Kick off mirroring if needed
+    self._handleExchangeReport(exchangeReport, (err) => {
+      /* istanbul ignore next */
+      if (err) {
+        // If handleExchangeReport results in error (default switch),
+        // And the error is MIRROR_FAILED
+        // Mirror is deleted from database.
+        if (exchangeReport.exchangeResultMessage == 'MIRROR_FAILED') {
+          self.storage.models.Mirror.deleteOne({
+            shardHash: exchangeReport.dataHash,
+            contact: exchangeReport.reportedId
+          }, function (err, mirror) {
+            if (err) {
+              log.warn('Cannot delete mirror after MIRROR_FAILED');
+            }
+          });
+        }
+        return log.warn(err.message);
+      }
+    });
+
+    exchangeReport.save(function (err) {
+      if (err) {
+        return next(new errors.BadRequestError(err.message));
+      }
+
+      res.status(201).send({});
+    });
+  });
+};
+
+/**
+ * @private
+ */
+ReportsRouter.prototype._handleExchangeReport = function (report, callback) {
+  const { dataHash, exchangeResultMessage } = report;
+
+  switch (exchangeResultMessage) {
+    case 'MIRROR_SUCCESS':
+    case 'SHARD_UPLOADED':
+    case 'DOWNLOAD_ERROR':
+      this._triggerMirrorEstablish(constants.M_REPLICATE, dataHash, callback);
+      break;
+    default:
+      callback(new Error('Exchange result type will not trigger action'));
+  }
+  // MIRROR_FAILED will run out the default switch.
+};
+
+ReportsRouter._sortByTimeoutRate = function (a, b) {
+  const a1 = a.contact.timeoutRate >= 0 ? a.contact.timeoutRate : 0;
+  const b1 = b.contact.timeoutRate >= 0 ? b.contact.timeoutRate : 0;
+  return (a1 === b1) ? 0 : (a1 > b1) ? 1 : -1;
+};
+
+ReportsRouter._sortByResponseTime = function (a, b) {
+  const aTime = a.contact.responseTime || Infinity;
+  const bTime = b.contact.responseTime || Infinity;
+  return (aTime === bTime) ? 0 : (aTime > bTime) ? 1 : -1;
+};
+
+/**
+ * Loads some mirrors for the hash and establishes them
+ * @private
+ */
+ReportsRouter.prototype._triggerMirrorEstablish = function (n, hash, done) {
+  const self = this;
+  let item = null;
+
+  function _loadShard(callback) {
+    self.contracts.load(hash, (err, _item) => {
+      if (err) {
+        return callback(err);
+      }
+      item = _item;
+      callback();
+    });
+  }
+
+  function _getMirrors(callback) {
+    self.storage.models.Mirror.find({ shardHash: hash })
+      .populate('contact')
+      .exec(callback);
+  }
+
+  function _getMirrorCandidate(mirrors, callback) {
+    let established = [], available = [];
+
+    mirrors.forEach((m) => {
+      if (!m.contact) {
+        log.warn('Mirror %s is missing contact in database', m._id);
+      } else if (!m.isEstablished) {
+        available.push(m);
+      } else {
+        established.push(m);
+      }
+    });
+
+    if (available.length === 0) {
+      return callback(new Error('No available mirrors'));
+    }
+
+    if (established.length >= n) {
+      return callback(new Error('Auto mirroring limit is reached'));
+    }
+
+    available.sort(utils.sortByReputation);
+
+    callback(null, available.shift());
+  }
+
+  function _getRetrievalTokenFromFarmer(mirror, callback) {
+    let farmers = Object.keys(item.contracts);
+    let pointer = null;
+    let test = () => farmers.length === 0 || pointer !== null;
+    let contact = storj.Contact(mirror.contact.toObject());
+
+    async.until(test, (done) => {
+      self.getContactById(farmers.pop(), (err, result) => {
+        if (err) {
+          return done();
+        }
+
+        let farmer = storj.Contact(result.toObject());
+
+        self.network.getRetrievalPointer(
+          farmer,
+          item.getContract(farmer),
+          (err, result) => {
+            // NB: Make sure that we don't set pointer to undefined
+            // instead of null that would trigger the until loop to quit
+            if (err) {
+              log.warn('Unable to get pointer for mirroring, reason: %s',
+                err.message);
+            } else {
+              pointer = result;
+            }
+            done();
+          }
+        );
+      });
+    }, () => {
+      if (!pointer) {
+        return callback(new Error('Failed to get pointer'));
+      }
+
+      callback(null, pointer, mirror, contact);
+    });
+  }
+
+  function _establishMirror(source, mirror, contact, callback) {
+    self.network.getMirrorNodes(
+      [source],
+      [contact],
+      (err) => {
+        if (err) {
+          return callback(err);
+        }
+
+        mirror.isEstablished = true;
+        mirror.save();
+        item.addContract(contact, storj.Contract(mirror.contract));
+        self.contracts.save(item, callback);
+      }
+    );
+  }
+
+  async.waterfall([
+    _loadShard,
+    _getMirrors,
+    _getMirrorCandidate,
+    _getRetrievalTokenFromFarmer,
+    _establishMirror
+  ], done);
+};
+
+/**
+ * @private
+ */
+ReportsRouter.prototype.getContactById = BucketsRouter.prototype.getContactById;
+
+/**
+ * @private
+ */
+ReportsRouter.prototype._definitions = function () {
+  return [
+    ['POST', '/reports/exchanges', this.getLimiter(limiter(1000)), middleware.rawbody,
+      this.createExchangeReport.bind(this)]
+  ];
+};
+
+module.exports = ReportsRouter;
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+<div class="modal fade" id="searchResults">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Search results</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+<footer>
+
+
+	<span class="copyright">
+	Copyright 2016 Storj Labs
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a>
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+<script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	$('pre').each(function(i, block) {
+		hljs.highlightBlock(block);
+	});
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			var id = $( heading ).attr( "id" );
+			return id && id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		SearcherDisplay.init();
+	});
+</script>
+
+</body>
+</html>

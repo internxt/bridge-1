@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Storj Bridge Source: lib/cleaner/index.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<script src="scripts/highlight.min.js"></script>
+
+	<link type="text/css" rel="stylesheet" href="styles/site.storj.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" style="background-image:url(img/storj-bridge.svg)"  href="index.html">Storj Bridge</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-storj-bridge.html">storj-bridge</a></li><li><a href="module-storj-bridge_constants.html">storj-bridge/constants</a></li><li><a href="module-storj-bridge_logger.html">storj-bridge/logger</a></li><li><a href="module-storj-bridge_utils.html">storj-bridge/utils</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="BucketsRouter.html">BucketsRouter</a></li><li><a href="Config.html">Config</a></li><li><a href="ContactsRouter.html">ContactsRouter</a></li><li><a href="Engine.html">Engine</a></li><li><a href="FramesRouter.html">FramesRouter</a></li><li><a href="PublicKeysRouter.html">PublicKeysRouter</a></li><li><a href="ReportsRouter.html">ReportsRouter</a></li><li><a href="Router.html">Router</a></li><li><a href="Server.html">Server</a></li><li><a href="StripeRouter.html">StripeRouter</a></li><li><a href="UsersRouter.html">UsersRouter</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="tutorial-auth.html">API Authentication</a></li><li><a href="tutorial-config_.html">Configuring the Bridge</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#Cleaner">Cleaner</a></li><li><a href="global.html#Monitor">Monitor</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+		<div class="col-sm-3 col-md-4">
+            <form class="navbar-form" role="search">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                    <div class="input-group-btn">
+                        <button class="btn btn-primary" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: lib/cleaner/index.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript ">'use strict';
+
+const async = require('async');
+const assert = require('assert');
+const crypto = require('crypto');
+const storj = require('storj-lib');
+const CleanerConfig = require('./config');
+const Storage = require('storj-service-storage-models');
+const ComplexClient = require('storj-complex').createClient;
+const MongoDBStorageAdapter = require('storj-mongodb-adapter');
+const ms = require('ms');
+const log = require('../logger');
+const errors = require('storj-service-error-types');
+
+/**
+ * A long running daemon that will inspect database looking for orphan
+ * documents and perform a clean up.
+ * It can be performed once a day.
+ * @param {CleanerConfig} config - An instance of CleanerConfig
+ */
+function Cleaner(config) {
+  if (!(this instanceof Cleaner)) {
+    return new Cleaner(config);
+  }
+
+  assert(config instanceof CleanerConfig, 'Invalid config supplied');
+
+  this.storage = null;
+  this.network = null;
+  this.contracts = null;
+
+  this._config = config;
+  this._timeout = null;
+  this._running = false;
+  this._underAttack = false;
+}
+
+/**
+ * Starts the Bridge instance
+ * @param {Function} callback
+ */
+Cleaner.prototype.start = function (callback) {
+  log.info('Cleaner service is starting');
+
+  this.storage = new Storage(
+    this._config.storage.mongoUrl,
+    this._config.storage.mongoOpts,
+    { logger: log }
+  );
+
+  this.network = new ComplexClient(this._config.complex);
+
+  this.contracts = new storj.StorageManager(
+    new MongoDBStorageAdapter(this.storage),
+    { disableReaper: true }
+  );
+
+  // setup next run event
+  this.wait();
+
+  callback();
+  process.on('SIGINT', this._handleSIGINT.bind(this));
+  process.on('exit', this._handleExit.bind(this));
+  process.on('uncaughtException', this._handleUncaughtException.bind(this));
+};
+
+Cleaner.sortByTimeoutRate = function (a, b) {
+  const a1 = a.contact.timeoutRate >= 0 ? a.contact.timeoutRate : 0;
+  const b1 = b.contact.timeoutRate >= 0 ? b.contact.timeoutRate : 0;
+  return (a1 === b1) ? 0 : (a1 > b1) ? 1 : -1;
+};
+
+Monitor.prototype.run = function () {
+
+  // If a check round is being executed, wait.
+  if (this._running) {
+    return this.wait();
+  }
+
+  const limit = this._config.application.queryNumber || 10;
+
+  const finish = (err) => {
+    if (err) {
+      log.error(err);
+    }
+    log.info('Ending cleaner round with failure rate of %s/%s from %s', fail, success, total);
+
+    this._running = false;
+    this.wait();
+  };
+
+  log.info('Starting clean up round');
+  this._running = true;
+
+  // Query the least seen contacts with timeout rates below threshold
+  // Look for shards below the required number of mirrors
+
+
+  const Contact = this.storage.models.Contact;
+  const query = {
+    $or: [
+      { timeoutRate: { $lt: timeoutRateThreshold } },
+      { timeoutRate: { $exists: false } }
+    ]
+  };
+
+  return;
+
+  const cursor = Contact.find(query).limit(limit).sort({ lastSeen: 1 });
+
+  cursor.exec((err, contacts) => {
+    if (err) {
+      return finish(err);
+    }
+
+    if (!contacts) {
+      return finish(
+        new errors.InternalError('No contacts in contacts collection')
+      );
+    }
+
+    // Update total length of contacts
+    total = contacts.length;
+    console.log("Total farmers found to scan: %s", total);
+
+    // Ping the least seen contacts
+    async.eachLimit(contacts, pingConcurrency, (contactData, next) => {
+
+      const contact = storj.Contact(contactData);
+
+
+      this.network.ping(contact, (err) => {
+        if (err) {
+          fail += 1;
+          log.error('Farmer %s failed ping, reason: %s', contact.nodeID, err.message);
+
+          contactData.recordTimeoutFailure().save((err) => {
+            if (err) {
+              log.error('Unable to save ping failure, farmer: %s, reason: %s', contact.nodeID, err.message);
+            }
+          });
+
+          if (contactData.timeoutRate >= timeoutRateThreshold) {
+            log.warn('Shards from farmer %s must be replicated, timeoutRate: %s', contact.nodeID, contactData.timeoutRate);
+            this._replicateFarmer(contact);
+          }
+
+        } else {
+          success += 1;
+        }
+
+        next();
+      });
+
+    }, finish);
+
+  });
+
+};
+
+Monitor.prototype._randomTime = function (max, min) {
+  const range = max - min;
+
+  assert(Number.isSafeInteger(range));
+  assert(range > 0, 'maxInterval is expected to be greater than minInterval');
+
+  const entropy = crypto.randomBytes(8).toString('hex');
+  const offset = Math.round(parseInt('0x' + entropy) / Math.pow(2, 64) * range);
+
+  return min + offset;
+};
+
+/**
+ * Will wait and then call `run` after a random amount of time
+ */
+Cleaner.prototype.wait = function () {
+  clearTimeout(this._timeout);
+
+  const max = ms(this._config.application.maxInterval);
+  const min = ms(this._config.application.minInterval);
+
+  const milliseconds = this._randomTime(max, min);
+  const minutes = Number(milliseconds / 1000 / 60).toFixed(2);
+
+  log.info('Scheduling next round in %s minutes', minutes);
+
+  this._timeout = setTimeout(() => this.run(), milliseconds);
+};
+
+/**
+ * Handles uncaught exceptions
+ * @private
+ */
+/* istanbul ignore next */
+Cleaner.prototype._handleUncaughtException = function (err) {
+  if (process.env.NODE_ENV === 'test') {
+    throw err;
+  }
+
+  log.error('An unhandled exception occurred:', err);
+  process.exit(1);
+};
+
+/**
+ * Handles exit event from process
+ * @private
+ */
+/* istanbul ignore next */
+Cleaner.prototype._handleExit = function () {
+  log.info('Cleaner service is shutting down');
+};
+
+/**
+ * Postpones process exit until requests are fullfilled
+ * @private
+ */
+/* istanbul ignore next */
+Cleaner.prototype._handleSIGINT = function () {
+  let waitTime = 0;
+
+  log.info('Received shutdown signal, checking for running cleaner');
+  setInterval(function () {
+    waitTime += Cleaner.SIGINT_CHECK_INTERVAL;
+
+    if (!this._running) {
+      process.exit();
+    }
+
+    if (waitTime > Cleaner.MAX_SIGINT_WAIT) {
+      process.exit();
+    }
+  }, Cleaner.SIGINT_CHECK_INTERVAL);
+};
+
+module.exports = Cleaner;
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+<div class="modal fade" id="searchResults">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Search results</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+<footer>
+
+
+	<span class="copyright">
+	Copyright 2016 Storj Labs
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a>
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+<script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	$('pre').each(function(i, block) {
+		hljs.highlightBlock(block);
+	});
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			var id = $( heading ).attr( "id" );
+			return id && id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		SearcherDisplay.init();
+	});
+</script>
+
+</body>
+</html>

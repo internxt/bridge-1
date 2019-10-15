@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Storj Bridge Source: lib/engine.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<script src="scripts/highlight.min.js"></script>
+
+	<link type="text/css" rel="stylesheet" href="styles/site.storj.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" style="background-image:url(img/storj-bridge.svg)"  href="index.html">Storj Bridge</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-storj-bridge.html">storj-bridge</a></li><li><a href="module-storj-bridge_constants.html">storj-bridge/constants</a></li><li><a href="module-storj-bridge_logger.html">storj-bridge/logger</a></li><li><a href="module-storj-bridge_utils.html">storj-bridge/utils</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="BucketsRouter.html">BucketsRouter</a></li><li><a href="Config.html">Config</a></li><li><a href="ContactsRouter.html">ContactsRouter</a></li><li><a href="Engine.html">Engine</a></li><li><a href="FramesRouter.html">FramesRouter</a></li><li><a href="PublicKeysRouter.html">PublicKeysRouter</a></li><li><a href="ReportsRouter.html">ReportsRouter</a></li><li><a href="Router.html">Router</a></li><li><a href="Server.html">Server</a></li><li><a href="StripeRouter.html">StripeRouter</a></li><li><a href="UsersRouter.html">UsersRouter</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="tutorial-auth.html">API Authentication</a></li><li><a href="tutorial-config_.html">Configuring the Bridge</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#Cleaner">Cleaner</a></li><li><a href="global.html#Monitor">Monitor</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+		<div class="col-sm-3 col-md-4">
+            <form class="navbar-form" role="search">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                    <div class="input-group-btn">
+                        <button class="btn btn-primary" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: lib/engine.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript ">'use strict';
+
+const v8 = require('v8');
+const hat = require('hat');
+const async = require('async');
+const storj = require('storj-lib');
+const assert = require('assert');
+const express = require('express');
+const crossorigin = require('cors');
+const helmet = require('helmet');
+const pkginfo = require('../package');
+const Config = require('./config');
+const Storage = require('storj-service-storage-models');
+const middleware = require('storj-service-middleware');
+const Server = require('./server');
+const pow = require('./server/middleware/pow');
+const Mailer = require('storj-service-mailer');
+const log = require('./logger');
+const ComplexClient = require('storj-complex').createClient;
+const MongoDBStorageAdapter = require('storj-mongodb-adapter');
+
+/**
+ * Primary interface to Bridge (the glue)
+ * @constructor
+ * @param {Config} config
+ */
+function Engine(config) {
+  if (!(this instanceof Engine)) {
+    return new Engine(config);
+  }
+
+  assert(config instanceof Config, 'Invalid config supplied');
+
+  this._config = config;
+  this._apispec = null;
+  this._pendingResponses = {};
+  this._cpuUsage = process.cpuUsage();
+  this._healthInterval = null;
+}
+
+Engine.SIGINT_CHECK_INTERVAL = 1000;
+Engine.MAX_SIGINT_WAIT = 5000;
+Engine.RESPONSE_CLEAN_INTERVAL = 5000;
+Engine.HEALTH_INTERVAL = 30000;
+
+/**
+ * Starts the Bridge instance
+ * @param {Function} callback
+ */
+Engine.prototype.start = function(callback) {
+  log.info('starting the bridge engine');
+
+  this.storage = new Storage(
+    this._config.storage.mongoUrl,
+    this._config.storage.mongoOpts,
+    { logger: log }
+  );
+  this.mailer = new Mailer(this._config.mailer);
+  this.network = new ComplexClient(this._config.complex);
+  this.contracts = new storj.StorageManager(
+    new MongoDBStorageAdapter(this.storage),
+    { disableReaper: true }
+  );
+  this.redis = require('redis').createClient(this._config.redis);
+  this.redis.on('ready', () => {
+    log.info('connected to redis');
+    pow.checkInitTarget(this.redis, (err) => {
+      if (err) {
+        log.error('unable to initialize pow settings', err);
+      }
+    });
+  });
+  this.redis.on('error', (err) => {
+    log.error('error connecting to redis', err);
+  });
+  this.server = new Server(this._config.server, this._configureApp());
+
+  this._healthInterval = setInterval(() => this._logHealthInfo(),
+                                     Engine.HEALTH_INTERVAL);
+
+  callback();
+  process.on('SIGINT', this._handleSIGINT.bind(this));
+  process.on('exit', this._handleExit.bind(this));
+  process.on('uncaughtException', this._handleUncaughtException.bind(this));
+};
+
+/**
+ * Handles uncaught exceptions
+ * @private
+ */
+/* istanbul ignore next */
+Engine.prototype._handleUncaughtException = function(err) {
+  if (process.env.NODE_ENV === 'test') {
+    throw err;
+  }
+
+  log.error('an unhandled exception occurred: %s', err.stack);
+  process.exit(1);
+};
+
+/**
+ * Handles exit event from process
+ * @private
+ */
+/* istanbul ignore next */
+Engine.prototype._handleExit = function() {
+  log.info('bridge service is shutting down');
+};
+
+/**
+ * Postpones process exit until requests are fullfilled
+ * @private
+ */
+/* istanbul ignore next */
+Engine.prototype._handleSIGINT = function() {
+  let self = this;
+  let waitTime = 0;
+
+  log.info('received shutdown signal, waiting for pending responses');
+  setInterval(function() {
+    waitTime += Engine.SIGINT_CHECK_INTERVAL;
+
+    if (Object.keys(self._pendingResponses).length === 0) {
+      process.exit();
+    }
+
+    if (waitTime > Engine.MAX_SIGINT_WAIT) {
+      process.exit();
+    }
+  }, Engine.SIGINT_CHECK_INTERVAL);
+};
+
+/**
+ * Configures the express app and loads routes
+ * @private
+ */
+Engine.prototype._configureApp = function() {
+  log.info('configuring service endpoints');
+
+  let self = this;
+  const app = express();
+  const routers = Server.Routes({
+    config: this._config,
+    storage: this.storage,
+    network: this.network,
+    mailer: this.mailer,
+    contracts: this.contracts,
+    redis: this.redis
+  });
+  const corsOptions = {
+    credentials: true,
+    origin: function (origin, next) {
+      const corsRegex = new RegExp(self._config.server.corsRegex);
+      const originAllowed = function () {
+        if (process.env.NODE_ENV !== 'production') {
+          log.warn('Insecure CORS configuration in use; non-production env detected');
+          return true;
+        }
+
+        return corsRegex.test(origin);
+      };
+
+      next(null, originAllowed());
+    }
+  };
+
+  function bindRoute(route) {
+    let verb = route.shift().toLowerCase();
+    app[verb].apply(app, route);
+  }
+
+  self._keepPendingResponsesClean();
+  app.use(this._trackResponseStatus.bind(this));
+  app.use(crossorigin(corsOptions));
+  app.use(helmet());
+  app.get('/', this._handleRootGET.bind(this));
+  routers.forEach(bindRoute);
+  app.use(middleware.errorhandler({ logger: log }));
+
+  return app;
+};
+
+/**
+ * Responds with the swagger spec
+ * @private
+ */
+Engine.prototype._handleRootGET = function(req, res) {
+  res.send(this.getSpecification());
+};
+
+/**
+ * Keeps tabs on all of the pending responses
+ * @private
+ */
+Engine.prototype._trackResponseStatus = function(req, res, next) {
+  this._pendingResponses[hat()] = [req.socket, res];
+  next();
+};
+
+/**
+ * Clean up the pending request stack
+ * @private
+ */
+Engine.prototype._keepPendingResponsesClean = function() {
+  var self = this;
+
+  setInterval(function() {
+    for (var id in self._pendingResponses) {
+      let [sock, resp] = self._pendingResponses[id];
+
+      if (sock.destroyed || resp.finished) {
+        delete self._pendingResponses[id];
+      }
+    }
+  }, Engine.RESPONSE_CLEAN_INTERVAL);
+};
+
+/**
+ * Count all current unfinished responses
+ * @private
+ */
+Engine.prototype._countPendingResponses = function() {
+  let self = this;
+  let count = 0;
+
+  for (var id in this._pendingResponses) {
+    let [sock, resp] = self._pendingResponses[id];
+
+    if (!(resp.finished || sock.destroyed)) {
+      count++;
+    } else {
+      delete this._pendingResponses[id];
+    }
+  }
+
+  return count;
+};
+
+Engine.prototype._logHealthInfo = function() {
+  async.series({
+    connections: (next) => {
+      this.server.server.getConnections(next);
+    }
+  }, (err, results) => {
+    if (err) {
+      // Error message is included in results below
+      results = {};
+    }
+
+    const cpuDiff = process.cpuUsage(this.cpuUsage);
+    this.cpuUsage = process.cpuUsage();
+
+    const health = {
+      pid: process.pid,
+      cpuUsage: this.cpuUsage,
+      cpuDiff: cpuDiff,
+      memory: process.memoryUsage(),
+      heapStatistics: v8.getHeapStatistics(),
+      heapSpaceStatistics: v8.getHeapSpaceStatistics(),
+      uptime: process.uptime(),
+      listening: this.server.server.listening,
+      connections: results.connections,
+      pendingResponses: this._countPendingResponses(),
+      databaseState: this.storage.connection.readyState,
+      redisConnected: this.redis.connected
+    };
+
+
+    if (err) {
+      health.error = err.message;
+    }
+
+    log.info('%j', { bridge_health_report: health });
+  });
+};
+
+/**
+ * Returns a dictionary of info about the service
+ * @returns {Object}
+ */
+Engine.prototype.getSpecification = function() {
+  this._apispec = require('./apispec.json');
+  this._apispec.schemes = this._config.server.ssl.cert ? ['https'] : ['http'];
+  this._apispec.host = this._config.server.host;
+  this._apispec.info = {
+    title: 'Internxt Bridge',
+    version: pkginfo.version,
+    description: pkginfo.description,
+    'x-protocol-version': storj.version.protocol,
+    'x-core-version': storj.version.software
+  };
+
+  return this._apispec;
+};
+
+module.exports = Engine;
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+<div class="modal fade" id="searchResults">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Search results</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+<footer>
+
+
+	<span class="copyright">
+	Copyright 2016 Storj Labs
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a>
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+<script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	$('pre').each(function(i, block) {
+		hljs.highlightBlock(block);
+	});
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			var id = $( heading ).attr( "id" );
+			return id && id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		SearcherDisplay.init();
+	});
+</script>
+
+</body>
+</html>

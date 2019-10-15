@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Storj Bridge Source: lib/server/routes/contacts.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<script src="scripts/highlight.min.js"></script>
+
+	<link type="text/css" rel="stylesheet" href="styles/site.storj.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top ">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" style="background-image:url(img/storj-bridge.svg)"  href="index.html">Storj Bridge</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-storj-bridge.html">storj-bridge</a></li><li><a href="module-storj-bridge_constants.html">storj-bridge/constants</a></li><li><a href="module-storj-bridge_logger.html">storj-bridge/logger</a></li><li><a href="module-storj-bridge_utils.html">storj-bridge/utils</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="BucketsRouter.html">BucketsRouter</a></li><li><a href="Config.html">Config</a></li><li><a href="ContactsRouter.html">ContactsRouter</a></li><li><a href="Engine.html">Engine</a></li><li><a href="FramesRouter.html">FramesRouter</a></li><li><a href="PublicKeysRouter.html">PublicKeysRouter</a></li><li><a href="ReportsRouter.html">ReportsRouter</a></li><li><a href="Router.html">Router</a></li><li><a href="Server.html">Server</a></li><li><a href="StripeRouter.html">StripeRouter</a></li><li><a href="UsersRouter.html">UsersRouter</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="tutorial-auth.html">API Authentication</a></li><li><a href="tutorial-config_.html">Configuring the Bridge</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="global.html#Cleaner">Cleaner</a></li><li><a href="global.html#Monitor">Monitor</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+		<div class="col-sm-3 col-md-4">
+            <form class="navbar-form" role="search">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                    <div class="input-group-btn">
+                        <button class="btn btn-primary" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: lib/server/routes/contacts.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript ">'use strict';
+
+const Router = require('./index');
+const dns = require('dns');
+const isIp = require('is-ip');
+const errors = require('storj-service-error-types');
+const inherits = require('util').inherits;
+const middleware = require('storj-service-middleware');
+const log = require('../../logger');
+const limiter = require('../limiter').DEFAULTS;
+const rawBody = require('../middleware/raw-body');
+const {getPOWMiddleware, getChallenge} = require('../middleware/pow');
+const {authFarmer} = require('../middleware/farmer-auth');
+
+/**
+ * Handles endpoints for all contact related endpoints
+ * @constructor
+ * @extends {Router}
+ */
+function ContactsRouter(options) {
+  if (!(this instanceof ContactsRouter)) {
+    return new ContactsRouter(options);
+  }
+
+  Router.apply(this, arguments);
+
+  this.redis = options.redis;
+  this.checkPOW = getPOWMiddleware(options.redis);
+  this.getLimiter = middleware.rateLimiter(options.redis);
+}
+
+inherits(ContactsRouter, Router);
+
+ContactsRouter.DEFAULTS = {
+  skip: 0,
+  limit: 30
+};
+
+/**
+ * Returns the correct skip and limit from the supplied page number
+ * @private
+ */
+ContactsRouter.prototype._getSkipLimitFromPage = function(page) {
+  page = page || 1;
+
+  return {
+    limit: ContactsRouter.DEFAULTS.limit,
+    skip: (page - 1) * ContactsRouter.DEFAULTS.limit
+  };
+};
+
+ContactsRouter.prototype.createChallenge = function(req, res, next) {
+  let powOpts = this.config.application.powOpts;
+  getChallenge(this.redis, powOpts, function(err, data) {
+    if (err) {
+      return next(new errors.InternalError(err.message));
+    }
+    res.status(201).send(data);
+  });
+};
+
+ContactsRouter.prototype.createContact = function(req, res, next) {
+  const Contact = this.storage.models.Contact;
+  Contact.record({
+    nodeID: req.headers['x-node-id'],
+    address: req.body.address,
+    port: req.body.port,
+    lastSeen: Date.now(),
+    spaceAvailable: req.body.spaceAvailable,
+    responseTime: 10000, // Need to set a default responseTime for new contacts
+    reputation: 0, // Set default reputation for new contacts as well
+    protocol: req.body.protocol,
+    ip: this._getContactIP(req.body.address)
+  }, function(err, contact) {
+    if (err) {
+      return next(new errors.InternalError(err.message));
+    }
+    // TODO Send 201 status when created, and 200 when it already
+    // exists. Multiple calls to record should behave the same,
+    // as is current.
+    res.status(200).send({
+      nodeID: contact.nodeID,
+      address: contact.address,
+      port: contact.port
+    });
+  });
+};
+
+ContactsRouter.prototype._getContactIP = function(addr) {
+  if (isIp(addr)) {
+    return addr;
+  } else {
+    dns.resolve4(addr, function (err, addresses) {
+      if (err) {
+        log.warn('getIPLookup: Could not resolve address: %s', addr);
+        return null;
+      }
+      log.debug('getIPLookup: Resolved address: %s to %s', addr, addresses[0]);
+      return addresses[0];
+    });
+  }
+};
+
+ContactsRouter.prototype.setDefaultResponseTime = function(nodeID) {
+  this.storage.models.Contact.findOneAndUpdate({
+    _id: nodeID,
+    responseTime: { $exists: false }
+  }, {
+    $set: {
+      responseTime: 10000
+    }
+  }, {
+    upsert: false
+  }, (err) => {
+    if (err) {
+      log.error('Error setting default responseTime for %s, reason: %s',
+                nodeID, err.message);
+    }
+  });
+};
+
+ContactsRouter.prototype.setDefaultReputation = function(nodeID) {
+  this.storage.models.Contact.findOneAndUpdate({
+    _id: nodeID,
+    reputation: { $exists: false }
+  }, {
+    $set: {
+      reputation: 0
+    }
+  }, {
+    upsert: false
+  }, (err) => {
+    if (err) {
+      log.error('Error setting default reputation for %s, reason: %s',
+                nodeID, err.message);
+    }
+  });
+};
+
+ContactsRouter.prototype.patchContactByNodeID = function(req, res, next) {
+  const Contact = this.storage.models.Contact;
+  const nodeID = req.headers['x-node-id'];
+
+  const data = {
+    lastSeen: Date.now()
+  };
+
+  if (req.body.address) {
+    data.address = req.body.address;
+    data.ip = this._getContactIP(req.body.address);
+  }
+
+  if (req.body.port) {
+    data.port = req.body.port;
+  }
+
+  if (req.body.protocol) {
+    data.protocol = req.body.protocol;
+  }
+
+  if (req.body.spaceAvailable === false ||
+      req.body.spaceAvailable === true) {
+    data.spaceAvailable = req.body.spaceAvailable;
+  }
+
+  Contact.findOneAndUpdate({ _id: nodeID }, { $set: data }, {
+    upsert: false,
+    returnNewDocument: true
+  }, (err, contact) => {
+    if (err) {
+      return next(new errors.InternalError(err.message));
+    }
+    if (!contact) {
+      return next(new errors.NotFoundError('Contact not found'));
+    }
+    if (!contact.responseTime) {
+      this.setDefaultResponseTime(nodeID);
+    }
+    if (!contact.reputation) {
+      this.setDefaultReputation(nodeID);
+    }
+
+    res.status(201).send({
+      nodeID: contact.nodeID,
+      address: contact.address,
+      port: contact.port,
+      spaceAvailable: contact.spaceAvailable
+    });
+  });
+};
+
+/**
+ * Lists the contacts according the the supplied query
+ * @param {http.IncomingMessage} req
+ * @param {http.ServerResponse} res
+ * @param {Function} next
+ */
+ContactsRouter.prototype.getContactList = function(req, res, next) {
+  const Contact = this.storage.models.Contact;
+
+  let allowedQueryParams = ['address'];
+  let opts = this._getSkipLimitFromPage(req.query.page);
+  let skip = opts.skip;
+  let limit = opts.limit;
+  let query = {};
+
+  for (let param in req.query) {
+    if (allowedQueryParams.indexOf(param) !== -1) {
+      query[param] = req.query[param];
+    }
+  }
+
+  let cursor = Contact.find(query).skip(skip).limit(limit).sort({
+    lastSeen: -1
+  });
+
+  cursor.exec(function(err, contacts) {
+    if (err) {
+      return next(new errors.InternalError(err.message));
+    }
+
+    res.status(200).send(contacts.sort(function(c1, c2) {
+      return c2.lastSeen - c1.lastSeen;
+    }).map(function(c) {
+      return c.toObject();
+    }));
+  });
+};
+
+/**
+ * Returns the contact information for the given nodeID
+ * @param {http.IncomingMessage} req
+ * @param {http.ServerResponse} res
+ * @param {Function} next
+ */
+ContactsRouter.prototype.getContactByNodeID = function(req, res, next) {
+  const Contact = this.storage.models.Contact;
+
+  Contact.findOne({ _id: req.params.nodeID }, function(err, contact) {
+    if (err) {
+      return next(new errors.InternalError(err.message));
+    }
+
+    if (!contact) {
+      return next(new errors.NotFoundError('Contact not found'));
+    }
+
+    res.status(200).send(contact.toObject());
+  });
+};
+
+/**
+ * Export definitions
+ * @private
+ */
+ContactsRouter.prototype._definitions = function() {
+  return [
+    ['GET', '/contacts', this.getLimiter(limiter(200)), this.getContactList],
+    ['GET', '/contacts/:nodeID', this.getLimiter(limiter(200)), this.getContactByNodeID],
+    ['PATCH', '/contacts/:nodeID', this.getLimiter(limiter(200)), rawBody, authFarmer, this.patchContactByNodeID],
+    ['POST', '/contacts', this.getLimiter(limiter(200)), this.checkPOW, rawBody, authFarmer, this.createContact],
+    ['POST', '/contacts/challenges', this.getLimiter(limiter(200)), rawBody, authFarmer, this.createChallenge]
+  ];
+};
+
+module.exports = ContactsRouter;
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+<div class="modal fade" id="searchResults">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Search results</h4>
+      </div>
+      <div class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
+
+<footer>
+
+
+	<span class="copyright">
+	Copyright 2016 Storj Labs
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.2</a>
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+<script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	$('pre').each(function(i, block) {
+		hljs.highlightBlock(block);
+	});
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			var id = $( heading ).attr( "id" );
+			return id && id.replace(/\~/g, '-inner-').replace(/\./g, '-static-') || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		SearcherDisplay.init();
+	});
+</script>
+
+</body>
+</html>
