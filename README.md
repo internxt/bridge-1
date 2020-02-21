@@ -6,10 +6,10 @@ Internxt Bridge
 Quick Start
 -----------
 
-Install MongoDB, Git and Wget:
+Install MongoDB, Git, Wget and build-essential:
 
 ```
-apt-get install mongodb redis-server git wget
+apt-get install mongodb redis-server git wget build-essential
 ```
 
 Install NVM, Node.js and NPM:
