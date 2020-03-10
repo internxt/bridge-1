@@ -1,19 +1,15 @@
 Internxt Bridge
 =======================================================================================================
 
-[![Build Status](https://img.shields.io/travis/Internxt/bridge.svg?style=flat-square)](https://travis-ci.org/Storj/bridge)
-[![Coverage Status](https://img.shields.io/coveralls/Internxt/bridge.svg?style=flat-square)](https://coveralls.io/r/Storj/bridge)
-[![NPM](https://img.shields.io/npm/v/internxt-bridge.svg?style=flat-square)](https://www.npmjs.com/package/internxt-bridge)
-[![GitHub license](https://img.shields.io/badge/license-AGPLv3-blue.svg?style=flat-square)](https://raw.githubusercontent.com/Internxt/data-api/master/LICENSE)
-
+[![Build Status](https://travis-ci.com/internxt/Bridge.svg?branch=master)](https://travis-ci.com/internxt/Bridge)
 
 Quick Start
 -----------
 
-Install MongoDB, Git and Wget:
+Install MongoDB, Git, Wget and build-essential:
 
 ```
-apt-get install mongodb redis-server git wget
+apt-get install mongodb redis-server git wget build-essential
 ```
 
 Install NVM, Node.js and NPM:
