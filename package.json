@@ -10,7 +10,8 @@
   "bin": {
     "storj-bridge": "bin/storj-bridge.js",
     "storj-monitor": "bin/storj-monitor.js",
-    "storj-renew": "bin/storj-contract-renew.js"
+    "storj-renew": "bin/storj-contract-renew.js",
+    "storj-cleaner": "bin/storj-cleaner.js"
   },
   "scripts": {
     "testsuite": "STORJ_ALLOW_LOOPBACK=1 NODE_ENV=test mocha --recursive test/**/*.js --exit",
@@ -59,7 +60,7 @@
   },
   "dependencies": {
     "analytics-node": "^2.4.0",
-    "async": "^3.1.0",
+    "async": "^3.2.0",
     "bn.js": "^4.11.8",
     "commander": "^2.20.0",
     "concat-stream": "^1.6.2",

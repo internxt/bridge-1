@@ -11,6 +11,7 @@ program.option('-c, --config <path_to_config_file>', 'path to the config file');
 program.parse(process.argv);
 
 var config = new Config(program.config);
+
 var cleaner = new Cleaner(config);
 
 cleaner.start(function(err) {
