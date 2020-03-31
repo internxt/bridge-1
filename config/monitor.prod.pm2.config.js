@@ -1,7 +1,7 @@
 module.exports = {
     apps: [{
         name: 'bridge-monitor',
-        script: 'storj-monitor',
+        script: './bin/storj-monitor.js',
         args: '-c /root/.storj-bridge/config/production',
         env: {
             STORJ_NETWORK: 'INXT',

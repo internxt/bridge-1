@@ -1,7 +1,7 @@
 module.exports = {
     apps: [{
         name: 'bridge-cleaner',
-        script: 'storj-cleaner',
+        script: './bin/storj-cleaner.js',
         args: '-c /root/.storj-bridge/config/production',
         env: {
             STORJ_NETWORK: 'INXT',
