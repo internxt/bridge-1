@@ -85,7 +85,7 @@
     "secp256k1": "^3.7.1",
     "storj-analytics": "internxt/inxt-analytics",
     "storj-complex": "github:internxt/complex#v7.6.3-beta",
-    "storj-lib": "github:internxt/core#v8.7.2",
+    "storj-lib": "github:internxt/core#v8.7.3-beta",
     "storj-mongodb-adapter": "github:internxt/mongodb-adapter#v9.0.1-beta",
     "storj-service-error-types": "github:internxt/service-error-types",
     "storj-service-mailer": "github:internxt/mailer",
