@@ -12,12 +12,12 @@ Install MongoDB, Git, Wget and build-essential:
 apt-get install mongodb redis-server git wget build-essential
 ```
 
-Install NVM, Node.js and NPM:
+Install [NVM][nvmsite], Node.js and NPM:
 
 ```
 wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
 source ~/.profile
-nvm install 8.15
+nvm install 10.19
 ```
 
 Clone the repository, install dependencies:
@@ -64,3 +64,5 @@ liable for any damage to your system. You also agree not to upload illegal
 content, content that infringes on other's IP, or information that would be
 protected by HIPAA, FERPA, or any similar standard. Generally speaking, you
 agree to test the software responsibly. We'd love to hear feedback too.
+
+ [nvmsite]: <https://github.com/nvm-sh/nvm>
