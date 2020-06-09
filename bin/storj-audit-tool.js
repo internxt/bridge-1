@@ -20,7 +20,7 @@ const leveldown = require('leveldown');
 const logger = require('../lib/logger');
 const readline = require('readline');
 const assert = require('assert');
-const {Transform} = require('stream');
+const { Transform } = require('stream');
 
 // SHARD STATUS ERROR STATUS
 const ERROR_SIZE = 6;
@@ -63,21 +63,24 @@ program
 
 // READ STDIN FOR THE CSV
 process.stdin.setEncoding('utf8');
+
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
   terminal: false
 });
 
+const DOWNLOAD_DIR = program.outputdir;
+assert(path.isAbsolute(DOWNLOAD_DIR), 'outputdir is expected to be absolute path');
+assert(fs.existsSync(DOWNLOAD_DIR), 'output directory doesn\'t exists');
+
 // SETUP DB AND NETWORK
 const config = new Config(process.env.NODE_ENV || 'develop', program.config,
-                          program.datadir);
+  program.datadir);
 const network = complex.createClient(config.complex);
 const { mongoUrl, mongoOpts } = config.storage;
 const storage = new Storage(mongoUrl, mongoOpts, { logger });
 
-const DOWNLOAD_DIR = program.outputdir;
-assert(path.isAbsolute(DOWNLOAD_DIR), 'outputdir is expected to be absolute path');
 
 const db = levelup(leveldown(path.resolve(DOWNLOAD_DIR, 'statedb')));
 
@@ -88,19 +91,15 @@ const statusInterval = setInterval(() => {
     totalShards += shardCount[key];
   }
   logger.info('status: contactCount: %d, totalShards: %d, contactFinished: %s, ' +
-              'shardFinished: %s, memory: %j',
-              contactCount, totalShards, contactFinished, shardFinished, process.memoryUsage());
+    'shardFinished: %s, memory: %j',
+    contactCount, totalShards, contactFinished, shardFinished, process.memoryUsage());
 
 }, 5 * 1000);
 
 // HELPER FUNCTIONS
-function sanitizeNodeID(a) {
-  return a.replace(/'/g, '');
-}
+function sanitizeNodeID(a) { return a.replace(/'/g, ''); }
 
-function toHexBuffer(a) {
-  return Buffer.from(a, 'hex')
-}
+function toHexBuffer(a) { return Buffer.from(a, 'hex'); }
 
 function closeProgram() {
   storage.connection.close();
@@ -113,6 +112,7 @@ function getDirectoryPath(shardHash) {
   return path.resolve(DOWNLOAD_DIR, shardHash.slice(0, 2), shardHash.slice(2, 4))
 }
 
+// Transform each line from input buffer into { nodeID, totalContracts, contractLimit } object
 let streamEnded = false;
 const stream = new Transform({
   objectMode: true,
@@ -146,24 +146,20 @@ stream.on('error', (err) => console.error('error', err));
 
 stream.on('end', () => streamEnded = true);
 
-stream.on('data', function(line) {
+stream.on('data', function (line) {
 
   // expand line to local variables
-  const {nodeID, totalContracts, contractLimit} = line;
+  const { nodeID, totalContracts, contractLimit } = line;
 
   contactCount++;
-  logger.info('starting on a contact: %s, contractLimit: %s, running count: %d',
-              nodeID, contractLimit, contactCount);
+  logger.info('starting on a contact: %s, contractLimit: %s, running count: %d', nodeID, contractLimit, contactCount);
 
-  if (contactCount >= CONTACT_CONCURRENCY) {
-    stream.pause();
-  };
+  if (contactCount >= CONTACT_CONCURRENCY) { stream.pause(); }
 
   function contactFinish(err) {
     contactCount--;
     contactFinished++;
-    logger.info('finished work on contact %s, running count: %d, paused: %s',
-                nodeID, contactCount, stream.isPaused());
+    logger.info('finished work on contact %s, running count: %d, paused: %s', nodeID, contactCount, stream.isPaused());
     if (err) {
       logger.error(err.message);
     }
@@ -221,7 +217,7 @@ stream.on('data', function(line) {
       cursor.on('data', function (shard) {
         shardCount[nodeID]++;
         logger.info('contact %s shard %s started, running shards: %d',
-                    nodeID, shard.hash, shardCount[nodeID])
+          nodeID, shard.hash, shardCount[nodeID])
         if (shardCount[nodeID] >= SHARD_CONCURRENCY) {
           cursor.pause();
         };
@@ -240,7 +236,7 @@ stream.on('data', function(line) {
           shardCount[nodeID]--;
           shardFinished++;
           logger.info('contact %s shard %s finished, running shards: %d',
-                      nodeID, shard.hash, shardCount[nodeID])
+            nodeID, shard.hash, shardCount[nodeID])
           if (err) {
             logger.error(err.message);
           }
@@ -308,7 +304,7 @@ stream.on('data', function(line) {
               });
 
               logger.info('starting to download shard %s with token %s for contact %s',
-                          shard.hash, pointer.token, nodeID)
+                shard.hash, pointer.token, nodeID)
 
               const hasher = crypto.createHash('sha256');
               var size = 0;
