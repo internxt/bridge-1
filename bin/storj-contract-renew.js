@@ -33,8 +33,16 @@ setTimeout(() => {
     logger.info('Contracts proccesed: %s, renewed: %s, errored: %s', counter.processed, counter.renewed, counter.errored);
   }, 15000)
 
-  renewal.initContractRenew((err) => {
-    console.log('Contract renew finished')
-    clearInterval(log);
-  });
+  function startRenewal() {
+
+    renewal.initContractRenew((err) => {
+      console.log('Contract renew finished')
+    });  
+  }
+
+  renewal.on('end', () => {
+    startRenewal();
+  })
+
+  startRenewal();
 }, 3000);
