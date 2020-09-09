@@ -2984,6 +2984,11 @@ lodash@^3.6.0:
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-3.10.1.tgz#5bf45e8e49ba4189e17d482789dfd15bd140b7b6"
   integrity sha1-W/Rejkm6QYnhfUgnid/RW9FAt7Y=
 
+lodash@^4.17.20:
+  version "4.17.20"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
+  integrity sha512-PlhdFcillOINfeV7Ni6oF1TAEayyZBoZ8bcshTHqOYJYlrqzRK5hagpagky5o4HfCzzd1TRkXPMFq6cKk9rGmA==
+
 log-driver@1.2.5:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/log-driver/-/log-driver-1.2.5.tgz#7ae4ec257302fd790d557cb10c97100d857b0056"
@@ -4694,14 +4699,14 @@ storj-analytics@internxt/inxt-analytics:
   resolved "https://codeload.github.com/internxt/complex/tar.gz/e87418ae294503a3acfc62d72dd98cac20f6e78a"
   dependencies:
     commander "^2.9.0"
-    hdkey "^1.1.1"
+    hdkey "^0.7.1"
     kad-logger-json "^0.1.2"
     merge "^1.2.0"
     rabbit.js "^0.4.4"
     readable-stream "^2.1.5"
     request "^2.75.0"
     restify "^4.1.1"
-    secp256k1 "^4.0.0"
+    secp256k1 "^3.2.2"
     storj-lib "github:internxt/core#v8.7.3-beta"
     storj-mongodb-adapter "github:internxt/mongodb-adapter#v9.0.1-beta"
     storj-service-storage-models "github:internxt/service-storage-models#10.6.1-beta"
@@ -4712,9 +4717,9 @@ storj-analytics@internxt/inxt-analytics:
   resolved "https://codeload.github.com/internxt/core/tar.gz/faf055db6ce13b53dadc37f452c48f418902a306"
   dependencies:
     async "^2.5.0"
-    bitcore-ecies JAlbertoGonzalez/bitcore-ecies
-    bitcore-lib "=8.17.1"
-    bitcore-message JAlbertoGonzalez/bitcore-message
+    bitcore-ecies "=1.0.1"
+    bitcore-lib "=0.13.19"
+    bitcore-message "=1.0.4"
     diglet "^1.0.6"
     diskusage "^0.2.4"
     hdkey "^0.7.1"
@@ -4740,7 +4745,7 @@ storj-analytics@internxt/inxt-analytics:
     restify "^4.3.0"
     rimraf "^2.6.2"
     scrypt "^6.0.3"
-    secp256k1 "^4.0.0"
+    secp256k1 "^3.3.0"
     semver "^5.4.1"
     through "^2.3.8"
 
@@ -4775,7 +4780,7 @@ storj-service-error-types@^1.4.0, "storj-service-error-types@github:internxt/ser
     basic-auth "^1.0.4"
     concat-stream "^1.5.2"
     redis "^2.7.1"
-    secp256k1 "^4.0.0"
+    secp256k1 "^3.2.2"
     storj-service-error-types "^1.4.0"
 
 "storj-service-storage-models@github:internxt/service-storage-models#10.6.1-beta":
