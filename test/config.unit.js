@@ -13,7 +13,7 @@ describe('Config', function() {
 
   const ENV = process.env;
   const PLATFORM = os.platform();
-  const DIRNAME = '.storj-bridge';
+  const DIRNAME = '.inxt-bridge';
   const HOME = PLATFORM === 'win32' ? ENV.USER_PROFILE : ENV.HOME;
   const DATADIR = path.join(HOME, DIRNAME);
   const CONFDIR = path.join(DATADIR, 'config');
@@ -151,9 +151,9 @@ describe('Config', function() {
   describe('@getPaths', function() {
     it('it will use defaults if confpath and datadir are undefined', function() {
       var paths = Config.getPaths('development');
-      expect(paths.datadir).to.equal(process.env.HOME + '/.storj-bridge');
-      expect(paths.confdir).to.equal(process.env.HOME + '/.storj-bridge/config');
-      expect(paths.confpath).to.equal(process.env.HOME + '/.storj-bridge/config/development');
+      expect(paths.datadir).to.equal(process.env.HOME + '/.inxt-bridge');
+      expect(paths.confdir).to.equal(process.env.HOME + '/.inxt-bridge/config');
+      expect(paths.confpath).to.equal(process.env.HOME + '/.inxt-bridge/config/development');
     });
     it('it will use confpath and datadir if defined', function() {
       var paths = Config.getPaths('development', '/tmp/etc/storj/bridge', '/tmp/var/storj/bridge');
@@ -169,7 +169,7 @@ describe('Config', function() {
     });
     it('it will use confpath and default datadir', function() {
       var paths = Config.getPaths('development', '/tmp/etc/storj/bridge', null);
-      expect(paths.datadir).to.equal(process.env.HOME + '/.storj-bridge');
+      expect(paths.datadir).to.equal(process.env.HOME + '/.inxt-bridge');
       expect(paths.confdir).to.equal('/tmp/etc/storj');
       expect(paths.confpath).to.equal('/tmp/etc/storj/bridge');
     });

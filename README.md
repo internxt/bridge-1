@@ -37,7 +37,7 @@ NODE_ENV=develop internxt-bridge
 > instead must communicate with a running 
 > [Internxt Complex](https://github.com/Internxt/complex) instance.
 
-This will use the configuration file located at `~/.storj-bridge/config/develop.json`.
+This will use the configuration file located at `~/.inxt-bridge/config/develop.json`.
 
 Windows
 -------
@@ -51,7 +51,7 @@ https://github.com/Storj/storj-automation/archive/master.zip
 The default configuration can be modified as needed.  It is located at
 
 ```
-%USERPROFILE%\.storj-bridge\config
+%USERPROFILE%\.inxt-bridge\config
 ```
 
 
