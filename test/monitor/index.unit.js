@@ -622,6 +622,9 @@ describe('Monitor', function() {
           Shard: {
             find: sandbox.stub().returns({
               cursor: sandbox.stub().returns(cursor)
+            }),
+            update: sandbox.stub().returns({
+              
             })
           }
         }
