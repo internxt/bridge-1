@@ -59,6 +59,7 @@
     "sinon": "^7.4.1"
   },
   "dependencies": {
+    "@amplitude/node": "^0.3.3",
     "analytics-node": "^2.4.0",
     "async": "^3.2.0",
     "bn.js": "^4.11.8",
