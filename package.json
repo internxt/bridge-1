@@ -17,7 +17,8 @@
     "testsuite": "STORJ_ALLOW_LOOPBACK=1 NODE_ENV=test mocha --recursive test/**/*.js --exit",
     "coverage": "STORJ_ALLOW_LOOPBACK=1 NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --recursive",
     "integration": "NODE_ENV=test _mocha --recursive test-integration/**",
-    "linter": "./node_modules/.bin/jshint --config .jshintrc ./index.js ./lib ./test",
+    "linter": "eslint ./test/**/*.js ./lib/**/*.js ./index.js",
+    "lint:fix": "npm run linter -- --fix",
     "test": "npm run testsuite && npm run linter",
     "dev": "NODE_ENV=development nodemon bin/storj-bridge.js",
     "make-docs": "./node_modules/.bin/jsdoc index.js lib -r -R README.md -u ./doc -c .jsdoc.json --verbose -d ./jsdoc",
@@ -44,6 +45,7 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "coveralls": "^2.11.6",
+    "eslint": "^7.10.0",
     "gh-pages": "^2.1.1",
     "ink-docstrap": "github:boshevski/docstrap",
     "istanbul": "^0.4.1",
