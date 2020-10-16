@@ -24,14 +24,18 @@ renewal.init();
 
 // Show progression data log
 const counter = { processed: 0, renewed: 0, errored: 0, total: 0 }
-const log = setInterval(() => {
-  logger.info('Contracts proccesed: %s, renewed: %s, errored: %s, total: %s, left: %s', counter.processed, counter.renewed, counter.errored, counter.total, counter.total - counter.processed);
-}, 15000)
-
 
 // Capture events
-renewal.on('counter-querysize', (size) => { counter.total = size });
-renewal.on('counter-processed', () => { counter.processed++ });
+renewal.on('counter-querysize', (size) => {
+  counter.total = size
+  counter.errored = 0
+  counter.processed = 0
+  counter.renewed = 0
+});
+renewal.on('counter-processed', () => {
+  counter.processed++
+  logger.info('Contracts proccesed: %s, renewed: %s, errored: %s, total: %s, left: %s', counter.processed, counter.renewed, counter.errored, counter.total, counter.total - counter.processed);
+});
 renewal.on('counter-errored', () => { counter.errored++ });
 renewal.on('counter-renewed', ({ contact, contract }) => { logger.info('Renewed %s %s', contact.nodeID, contract.data_hash); counter.renewed++; });
 renewal.on('counter-errors', ({ contact, contract, error }) => {
@@ -49,9 +53,7 @@ renewal.on('counter-errors', ({ contact, contract, error }) => {
   }
 })
 
-renewal.on('end', () => {
-  startRenewal();
-})
+renewal.on('end', () => { startRenewal() })
 
 function startRenewal() {
   renewal.initContractRenew((err) => {

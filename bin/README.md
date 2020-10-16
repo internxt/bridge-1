@@ -1,4 +1,4 @@
-# Storj Audit Tool CLI
+# Inxt Audit Tool CLI
 
 This tool iterates over a list of nodeIDs and for each nodeID, it downloads a random selection of shards from the given node (aka farmer aka contact).
 Could potentially be used to check shard challenges to ensure shard integrity.
@@ -8,14 +8,14 @@ Could potentially be used to check shard challenges to ensure shard integrity.
 
 For the audit tool:
 
-First create the directory `/tmp/storj` as an output directory, then:
+First create the directory `/tmp/inxt` as an output directory, then:
 ```
-cat contacts.csv | node storj-audit-tool.js -o /tmp/storj -c /path/to/config.json
+cat contacts.csv | node storj-audit-tool.js -o /tmp/inxt -c /path/to/config.json
 ```
 
 To run the report tool on the data saved in leveldb:
 ```
-node storj-audit-report -o /tmp/storj -c /path/to/config.json
+node storj-audit-report -o /tmp/inxt -c /path/to/config.json
 ```
 
 -----------------
