@@ -14,7 +14,7 @@ const Storage = proxyquire('storj-service-storage-models', {
     mongoose: mongoose
 });
 const Network = require('storj-complex').createClient;
-const Mailer = require('storj-service-mailer');
+const Mailer = require('inxt-service-mailer');
 const MongoDBAdapter = proxyquire('storj-mongodb-adapter', {
     mongoose: mongoose
 });

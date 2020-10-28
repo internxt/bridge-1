@@ -26,7 +26,7 @@ describe('BucketsRouter Integration', function() {
 
     const TestEngine = proxyquire('../../../lib/engine', {
       'storj-service-storage-models': MockStorage,
-      'storj-service-mailer': MockMailer,
+      'inxt-service-mailer': MockMailer,
       'storj-complex': MockComplex,
       'storj-mongodb-adapter': MockMongoAdapter
     });
