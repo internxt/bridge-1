@@ -13,9 +13,12 @@ program.parse(process.argv);
 var config = new Config(program.config);
 var replicator = new Replicator(config);
 
+replicator.init();
+
 replicator.start(function (err) {
   if (err) {
-    console.error(err)
+    console.error(err);
+    process.exit(1);
   }
 });
 
