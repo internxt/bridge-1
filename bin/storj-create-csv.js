@@ -12,14 +12,14 @@ program
   .parse(process.argv);
 
 const config = new Config(process.env.NODE_ENV || 'develop', program.config,
-    program.datadir);
+  program.datadir);
 const { mongoUrl, mongoOpts } = config.storage;
 const storage = new Storage(mongoUrl, mongoOpts, { logger });
 
-storage.models.Contact.distinct("_id", (err, contacts) => {
-    const filename = path.join(__dirname, 'contacts.csv');
-    contacts = Array.from(contacts, c => [c]);
-    contacts = ['nodeID', ...contacts];
-    fs.writeFileSync(filename, contacts.join(os.EOL));
-    storage.connection.close();
+storage.models.Contact.distinct('_id', (err, contacts) => {
+  const filename = path.join(__dirname, 'contacts.csv');
+  contacts = Array.from(contacts, c => [c]);
+  contacts = ['nodeID', ...contacts];
+  fs.writeFileSync(filename, contacts.join(os.EOL));
+  storage.connection.close();
 });

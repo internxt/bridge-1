@@ -18,7 +18,7 @@
     "testsuite": "STORJ_ALLOW_LOOPBACK=1 NODE_ENV=test mocha --recursive test/**/*.js --exit",
     "coverage": "STORJ_ALLOW_LOOPBACK=1 NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --recursive",
     "integration": "NODE_ENV=test _mocha --recursive test-integration/**",
-    "linter": "eslint ./test/**/*.js ./lib/**/*.js ./index.js",
+    "linter": "eslint ./test/**/*.js ./lib/**/*.js ./index.js ./bin/**/*.js ./config/**/*.js",
     "lint:fix": "npm run linter -- --fix",
     "test": "npm run testsuite && npm run linter",
     "dev": "NODE_ENV=development nodemon bin/storj-bridge.js",

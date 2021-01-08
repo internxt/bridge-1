@@ -52,8 +52,8 @@ let contactFinished = 0;
 let shardFinished = 0;
 
 // OTHER SETTINGS
-const SHARD_SOCKET_TIMEOUT = 90 * 1000 // milliseconds
-const SHARD_TRANSFER_MAXTIME = 20 * 60 * 1000 // milliseconds
+const SHARD_SOCKET_TIMEOUT = 90 * 1000; // milliseconds
+const SHARD_TRANSFER_MAXTIME = 20 * 60 * 1000; // milliseconds
 
 program
   .version('0.0.1')
@@ -92,7 +92,7 @@ const statusInterval = setInterval(() => {
   }
   logger.info('status: contactCount: %d, totalShards: %d, contactFinished: %s, ' +
     'shardFinished: %s, memory: %j',
-    contactCount, totalShards, contactFinished, shardFinished, process.memoryUsage());
+  contactCount, totalShards, contactFinished, shardFinished, process.memoryUsage());
 
 }, 5 * 1000);
 
@@ -109,7 +109,7 @@ function closeProgram() {
 
 function getDirectoryPath(shardHash) {
   // creating two directories based on first two bytes
-  return path.resolve(DOWNLOAD_DIR, shardHash.slice(0, 2), shardHash.slice(2, 4))
+  return path.resolve(DOWNLOAD_DIR, shardHash.slice(0, 2), shardHash.slice(2, 4));
 }
 
 // Transform each line from input buffer into { nodeID, totalContracts, contractLimit } object
@@ -124,7 +124,7 @@ const stream = new Transform({
       const items = chunk.split(',').map(x => x.trim());
       const totalContracts = parseInt(items[contractsColumnIndex]);
       const size = Math.round(AUDIT_SAMPLE_RATIO * totalContracts, 0);
-      const limit = Math.min(Math.max(size, AUDIT_SAMPLE_MIN), AUDIT_SAMPLE_MAX)
+      const limit = Math.min(Math.max(size, AUDIT_SAMPLE_MIN), AUDIT_SAMPLE_MAX);
       const contractLimit = Number.isInteger(limit) ? limit : AUDIT_SAMPLE_MIN;
       callback(null, {
         nodeID: items[nodeIDColumnIndex],
@@ -170,7 +170,7 @@ stream.on('data', function (line) {
     } else if (stream.isPaused() && contactCount < CONTACT_CONCURRENCY) {
       stream.resume();
     }
-  };
+  }
 
   const shardResults = {};
   async.series([
@@ -217,10 +217,10 @@ stream.on('data', function (line) {
       cursor.on('data', function (shard) {
         shardCount[nodeID]++;
         logger.info('contact %s shard %s started, running shards: %d',
-          nodeID, shard.hash, shardCount[nodeID])
+          nodeID, shard.hash, shardCount[nodeID]);
         if (shardCount[nodeID] >= SHARD_CONCURRENCY) {
           cursor.pause();
-        };
+        }
 
         let shardFinishedCalled = false;
         let shardTransferTimeout = null;
@@ -236,18 +236,18 @@ stream.on('data', function (line) {
           shardCount[nodeID]--;
           shardFinished++;
           logger.info('contact %s shard %s finished, running shards: %d',
-            nodeID, shard.hash, shardCount[nodeID])
+            nodeID, shard.hash, shardCount[nodeID]);
           if (err) {
             logger.error(err.message);
           }
           if (shardCount[nodeID] === 0 && shardCursorEnded) {
             // THE END all shards have been downloaded
-            logger.info('all shards downloaded for contact %s', nodeID)
+            logger.info('all shards downloaded for contact %s', nodeID);
             next();
           } else if (shardCount[nodeID] < SHARD_CONCURRENCY) {
             cursor.resume();
           }
-        };
+        }
 
         storage.models.Contact.findOne({ '_id': nodeID }, function (err, contact) {
           if (err) {
@@ -257,7 +257,7 @@ stream.on('data', function (line) {
             shardResults[sanitizeNodeID(shard.hash)] = {
               status: ERROR_CONTACT,
               contract: null
-            }
+            };
             return shardFinish(new Error('contact not found: ' + nodeID));
           }
 
@@ -273,7 +273,7 @@ stream.on('data', function (line) {
             shardResults[sanitizeNodeID(shard.hash)] = {
               status: ERROR_CONTRACT,
               contract: null
-            }
+            };
             return shardFinish(new Error('contract not found'));
           }
 
@@ -285,7 +285,7 @@ stream.on('data', function (line) {
               shardResults[sanitizeNodeID(shard.hash)] = {
                 status: ERROR_TOKEN,
                 contract: contract.toObject()
-              }
+              };
               return shardFinish();
             }
 
@@ -304,7 +304,7 @@ stream.on('data', function (line) {
               });
 
               logger.info('starting to download shard %s with token %s for contact %s',
-                shard.hash, pointer.token, nodeID)
+                shard.hash, pointer.token, nodeID);
 
               const hasher = crypto.createHash('sha256');
               var size = 0;
@@ -355,16 +355,16 @@ stream.on('data', function (line) {
                     shardResults[sanitizeNodeID(shard.hash)] = {
                       status: ERROR_HASH,
                       contract: contract.toObject()
-                    }
+                    };
                     logger.info('shard %s failed to download, actual: %s', shard.hash, actual);
-                    shardFinish(new Error('unexpected data'))
+                    shardFinish(new Error('unexpected data'));
                   } else if (size !== contract.get('data_size')) {
                     shardResults[sanitizeNodeID(shard.hash)] = {
                       status: ERROR_SIZE,
                       contract: contract.toObject()
-                    }
+                    };
                     logger.info('shard %s wrong size, actual: %s', contract.get('data_size'), size);
-                    shardFinish(new Error('unexpected size'))
+                    shardFinish(new Error('unexpected size'));
                   } else {
                     shardResults[sanitizeNodeID(shard.hash)] = {
                       status: SUCCESS,
@@ -389,7 +389,7 @@ stream.on('data', function (line) {
                 shardRequest.abort();
               }, SHARD_TRANSFER_MAXTIME);
 
-            })
+            });
 
           });
         });
@@ -405,5 +405,5 @@ stream.on('data', function (line) {
         next();
       });
     }
-  ], contactFinish)
+  ], contactFinish);
 });
