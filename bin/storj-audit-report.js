@@ -71,28 +71,28 @@ stream.on('data', function (data) {
     total++;
     const item = results[shardHash];
     switch (item.status) {
-      case SUCCESS:
-        totalBytes += item.contract.data_size;
-        success++;
-        break;
-      case ERROR_HASH:
-        hash++;
-        break;
-      case ERROR_SIZE:
-        size++;
-        break;
-      case ERROR_TOKEN:
-        token++;
-        break;
-      case ERROR_CONTRACT:
-        contract++;
-        break;
-      case ERROR_CONTACT:
-        contact++;
-        break;
-      case ERROR_STREAM:
-        stream++;
-        break;
+    case SUCCESS:
+      totalBytes += item.contract.data_size;
+      success++;
+      break;
+    case ERROR_HASH:
+      hash++;
+      break;
+    case ERROR_SIZE:
+      size++;
+      break;
+    case ERROR_TOKEN:
+      token++;
+      break;
+    case ERROR_CONTRACT:
+      contract++;
+      break;
+    case ERROR_CONTACT:
+      contact++;
+      break;
+    case ERROR_STREAM:
+      stream++;
+      break;
     }
   }
   let percentage = 0;
@@ -100,13 +100,13 @@ stream.on('data', function (data) {
     percentage = success / total * 100;
   }
   console.log('%s, %s, %s, %s, %s, %s, %s, %s, %s, %s', nodeID, percentage.toFixed(0), success, total, stream, hash, size, token, contract, contact, totalBytes);
-})
+});
 
 stream.on('error', function (err) {
   console.error(err);
-})
+});
 
-stream.on('close', function () { })
+stream.on('close', function () { });
 stream.on('end', function () {
   closeProgram();
-})
+});
