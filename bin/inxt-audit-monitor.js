@@ -20,13 +20,6 @@ const config = new Config(process.env.NODE_ENV || 'develop', program.config, pro
 
 const audit = new Audit(config, program.attempts);
 audit.init();
-// audit.start(program.nodeId, program.shardId, function (err) {
-//   if (err) {
-//     console.error(err);
-//     process.exit(1);
-//   }
-// });
-
 audit.start(program.nodeId, program.shardId)
   .then(() => process.exit(0))
   .catch((err) => {
