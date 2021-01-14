@@ -7,10 +7,10 @@ const Audit = require('../lib/audit');
 
 program
   .version('0.0.1')
+  .option('-w, --wallet <wallet_hash>', 'hash of the payment wallet whose nodes to be audited')
   .option('-n, --nodeId <node_id>', 'id of the node to be audited')
   .option('-s, --shardId <node_id>', 'id of the shard to be audited')
   .option('-c, --config <path_to_config_file>', 'path to the config file')
-  .option('-o, --outputdir <path_to_outputdir>', 'path to where shards are saved')
   .option('-a, --attempts <attempts_to_retry>', 'number of attempts to audit the shard (sometimes nodes fail to send the shard)')
   .parse(process.argv);
 
@@ -20,13 +20,28 @@ const config = new Config(process.env.NODE_ENV || 'develop', program.config, pro
 
 const audit = new Audit(config, program.attempts);
 audit.init();
-// audit.start(program.nodeId, program.shardId)
-//   .then(() => process.exit(0))
-//   .catch((err) => {
-//     console.error(err);
-//     process.exit(1);
-//   });
 
-audit.areShardsAvailableForNode({ nodeId: program.nodeId }).catch(console.log);
+// Audit a wallet
+if(program.wallet) {
+  audit.wallet(program.wallet).catch(console.log);
+  return;
+}
+
+
+if(program.nodeId) {
+  const attempts = program.attempts && !isNaN(program.attempts) ? program.attempts : 1;
+
+  if(program.shardId) {
+    // Audit a shard
+    audit.shard(program.shardId, program.nodeId, attempts).catch(console.log);
+    return;
+  } else {
+    // Audit a node
+    audit.node(program.nodeId).catch(console.log);
+    return;
+  }
+}
+
+console.log('please provide a valid option');
 
 module.exports = audit;
