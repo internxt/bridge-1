@@ -1,7 +1,6 @@
 const Config = require('../lib/config');
 const program = require('commander');
-// const Storage = require('storj-service-storage-models');
-// const logger = require('../lib/logger');
+const log = require('../lib/logger');
 
 const Audit = require('../lib/audit');
 
@@ -9,7 +8,7 @@ program
   .version('0.0.1')
   .option('-w, --wallet <wallet_hash>', 'hash of the payment wallet whose nodes to be audited')
   .option('-n, --nodeId <node_id>', 'id of the node to be audited')
-  .option('-s, --shardId <node_id>', 'id of the shard to be audited')
+  .option('-h, --shardHash <node_id>', 'id of the shard to be audited')
   .option('-c, --config <path_to_config_file>', 'path to the config file')
   .option('-a, --attempts <attempts_to_retry>', 'number of attempts to audit the shard (sometimes nodes fail to send the shard)')
   .parse(process.argv);
@@ -18,30 +17,46 @@ program
 /* SETUP */
 const config = new Config(process.env.NODE_ENV || 'develop', program.config, program.datadir);
 
-const audit = new Audit(config, program.attempts);
-audit.init();
+function startMonitor () {
+  const audit = new Audit(config, program.attempts);
+  audit.init();
 
-// Audit a wallet
-if(program.wallet) {
-  audit.wallet(program.wallet).catch(console.log);
-  return;
-}
-
-
-if(program.nodeId) {
-  const attempts = program.attempts && !isNaN(program.attempts) ? program.attempts : 1;
-
-  if(program.shardId) {
-    // Audit a shard
-    audit.shard(program.shardId, program.nodeId, attempts).catch(console.log);
+  // Audit a wallet
+  if(program.wallet) {
+    audit.wallet(program.wallet).catch(console.log);
     return;
+  }
+
+
+  if(program.nodeId) {
+    const attempts = program.attempts && !isNaN(program.attempts) ? program.attempts : 1;
+
+    if(program.shardHash) {
+      // Audit a shard
+      log.info('Auditing a shard');
+      audit.shard(program.shardHash, program.nodeId, attempts)
+        .then((result) => {
+          const msg = `Audit finished. Shard is ${result.healthy ? 'healthy' : 'not healthy'}.`;
+          log.info(msg);
+          log.info(`Reason (if not healthy): ${result.reason}`);
+        })
+        .catch(console.log);
+      return;
+    } else {
+      // Audit a node
+      log.info('Auditing a node');
+      audit.node(program.nodeId)
+        .then((result) => {
+          const msg = 'Audit finished';
+          log.info(msg);
+          console.log(result);
+        })
+        .catch(console.log);
+      return;
+    }
   } else {
-    // Audit a node
-    audit.node(program.nodeId).catch(console.log);
-    return;
+    log.error('please provide a valid option');
   }
 }
 
-console.log('please provide a valid option');
-
-module.exports = audit;
+startMonitor();
