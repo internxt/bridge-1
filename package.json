@@ -12,7 +12,8 @@
     "storj-monitor": "bin/storj-monitor.js",
     "storj-renew": "bin/storj-contract-renew.js",
     "storj-cleaner": "bin/storj-cleaner.js",
-    "inxt-replicator": "bin/inxt-replicator.js"
+    "inxt-replicator": "bin/inxt-replicator.js",
+    "inxt-audit": "bin/inxt-audit-monitor.js"
   },
   "scripts": {
     "testsuite": "STORJ_ALLOW_LOOPBACK=1 NODE_ENV=test mocha --recursive test/**/*.js --exit",
