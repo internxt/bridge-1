@@ -44,7 +44,7 @@ function startMonitor () {
       log.info('Auditing a shard');
       audit.shard(program.shardHash, program.nodeId, attempts)
         .then((result) => {
-          const msg = `Audit finished. Shard is ${result.healthy ? 'healthy' : 'not healthy'}.`;
+          const msg = `Audit finished. Tried ${attempts} times. Shard is ${result.healthy ? 'healthy' : 'not healthy'}.`;
           log.info(msg);
           log.info(`Reason (if not healthy): ${result.reason}`);
         })
