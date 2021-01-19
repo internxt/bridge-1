@@ -1,6 +1,7 @@
 const Config = require('../lib/config');
 const program = require('commander');
 const log = require('../lib/logger');
+const fs = require('fs');
 
 const Audit = require('../lib/audit');
 
@@ -23,7 +24,14 @@ function startMonitor () {
 
   // Audit a wallet
   if(program.wallet) {
-    audit.wallet(program.wallet).catch(console.log);
+    audit.wallet(program.wallet)
+      .then((response) => {
+        console.log('generating report');
+        fs.writeFile(`./report_${program.wallet}.json`, JSON.stringify(response) , 'utf-8');
+        console.log('finished');
+        process.exit(0);
+      })
+      .catch(log.warn);
     return;
   }
 
