@@ -26,9 +26,9 @@ function startMonitor () {
   if(program.wallet) {
     audit.wallet(program.wallet)
       .then((response) => {
-        console.log('generating report');
-        fs.writeFile(`./report_${program.wallet}.json`, JSON.stringify(response) , 'utf-8');
-        console.log('finished');
+        log.info('generating report');
+        fs.writeFile(`./report_${program.wallet}.json`, JSON.stringify(response.nodesAudited) , 'utf-8');
+        log.info(`Finished. Overall health for nodes related to this wallet ${response.overallHealth}`);
         process.exit(0);
       })
       .catch(log.warn);
