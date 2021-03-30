@@ -14,7 +14,6 @@ const Storage = require('storj-service-storage-models');
 const complex = require('storj-complex');
 const mkdirp = require('mkdirp');
 const path = require('path');
-const through2 = require('through2');
 const levelup = require('levelup');
 const leveldown = require('leveldown');
 const logger = require('../lib/logger');
@@ -149,7 +148,7 @@ stream.on('end', () => streamEnded = true);
 stream.on('data', function (line) {
 
   // expand line to local variables
-  const { nodeID, totalContracts, contractLimit } = line;
+  const { nodeID, contractLimit } = line;
 
   contactCount++;
   logger.info('starting on a contact: %s, contractLimit: %s, running count: %d', nodeID, contractLimit, contactCount);
@@ -327,7 +326,7 @@ stream.on('data', function (line) {
                 let error;
                 if (statusCode !== 200) {
                   error = new Error('unexpected status code: ' + statusCode);
-                } else if (!/^application\/octet\-stream/.test(contentType)) {
+                } else if (!/^application\/octet-stream/.test(contentType)) {
                   error = new Error('unexpected content type: ' + contentType);
                 }
 

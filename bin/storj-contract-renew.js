@@ -6,7 +6,6 @@ const program = require('commander');
 const Config = require('../lib/config');
 const Renewal = require('../lib/renewal');
 const logger = require('../lib/logger');
-const _ = require('lodash');
 
 program.version(require('../package').version);
 program.option('-c, --config <path_to_config_file>', 'path to the config file');
@@ -41,15 +40,15 @@ renewal.on('counter-renewed', ({ contact, contract }) => { logger.info('Renewed 
 renewal.on('counter-errors', ({ contact, contract, error }) => {
   logger.error('Error nodeID: %s, hash: %s, reason: %s', contact.nodeID, contract.data_hash, error.message);
   switch (error.message) {
-  case 'Invalid farmer contract':
+    case 'Invalid farmer contract':
     // TODO: Should check shard issues and clean database if needed
-    break;
-  default:
-    if (error.message.includes('timed out')) {
+      break;
+    default:
+      if (error.message.includes('timed out')) {
       // console.log('TIMEOUT')
-    } else {
-      console.log('Not handled: %s', error.message);
-    }
+      } else {
+        console.log('Not handled: %s', error.message);
+      }
   }
 });
 

@@ -3,20 +3,10 @@
 
 // usage: node storj-audit-report -o /tmp/storj -c /path/to/config.json
 
-const fs = require('fs');
-const async = require('async');
-const crypto = require('crypto');
-const Config = require('../lib/config');
 const program = require('commander');
-const storj = require('storj-lib');
-const Storage = require('storj-service-storage-models');
-const complex = require('storj-complex');
-const mkdirp = require('mkdirp');
 const path = require('path');
-const through2 = require('through2');
 const levelup = require('levelup');
 const leveldown = require('leveldown');
-const logger = require('../lib/logger');
 const assert = require('assert');
 
 // SHARD STATUS ERROR STATUS
@@ -71,28 +61,28 @@ stream.on('data', function (data) {
     total++;
     const item = results[shardHash];
     switch (item.status) {
-    case SUCCESS:
-      totalBytes += item.contract.data_size;
-      success++;
-      break;
-    case ERROR_HASH:
-      hash++;
-      break;
-    case ERROR_SIZE:
-      size++;
-      break;
-    case ERROR_TOKEN:
-      token++;
-      break;
-    case ERROR_CONTRACT:
-      contract++;
-      break;
-    case ERROR_CONTACT:
-      contact++;
-      break;
-    case ERROR_STREAM:
-      stream++;
-      break;
+      case SUCCESS:
+        totalBytes += item.contract.data_size;
+        success++;
+        break;
+      case ERROR_HASH:
+        hash++;
+        break;
+      case ERROR_SIZE:
+        size++;
+        break;
+      case ERROR_TOKEN:
+        token++;
+        break;
+      case ERROR_CONTRACT:
+        contract++;
+        break;
+      case ERROR_CONTACT:
+        contact++;
+        break;
+      case ERROR_STREAM:
+        stream++;
+        break;
     }
   }
   let percentage = 0;

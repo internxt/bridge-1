@@ -10,7 +10,7 @@ const storj = require('storj-lib');
 const Monitor = require('../../lib/monitor');
 const MonitorConfig = require('../../lib/monitor/config');
 const log = require('../../lib/logger');
-const utils = require('../../lib/utils')
+const utils = require('../../lib/utils');
 
 /* jshint maxstatements: 100 */
 
@@ -872,14 +872,14 @@ describe('Monitor', function() {
 
       expect(find.callCount).to.equal(1);
       expect(find.args[0][0]).to.eql({
-        "$or":[{
-          "_id":{"$nin":[]}},
-          {"timeoutRate":{"$lt":0.04}},
-          {"timeoutRate":{"$exists":false}},
-          {"$and":[{"timeoutRate":{"$gte":0.04}},
-          {"$expr":{"$gt":["$lastSeen","$lastTimeout"]}}]},
-          {"timeoutRate":{"$exists":false}}]
-        });
+        '$or':[{
+          '_id':{'$nin':[]}},
+        {'timeoutRate':{'$lt':0.04}},
+        {'timeoutRate':{'$exists':false}},
+        {'$and':[{'timeoutRate':{'$gte':0.04}},
+          {'$expr':{'$gt':['$lastSeen','$lastTimeout']}}]},
+        {'timeoutRate':{'$exists':false}}]
+      });
 
       expect(sort.callCount).to.equal(1);
       expect(sort.args[0][0]).to.eql({lastSeen: 1});
