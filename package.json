@@ -57,6 +57,7 @@
     "memdown": "^4.1.0",
     "mocha": "^6.2.0",
     "node-mocks-http": "^1.7.6",
+    "nodemon": "^2.0.7",
     "noisegen": "^1.0.0",
     "proxyquire": "^1.7.10",
     "redis-mock": "^0.16.0",
