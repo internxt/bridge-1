@@ -16,7 +16,7 @@
     "inxt-audit": "bin/inxt-audit-monitor.js"
   },
   "scripts": {
-    "testsuite": "STORJ_ALLOW_LOOPBACK=1 NODE_ENV=test mocha --recursive test/**/*.js --exit",
+    "testsuite": "STORJ_ALLOW_LOOPBACK=1 NODE_ENV=test ./node_modules/.bin/mocha --recursive test/ --exit",
     "coverage": "STORJ_ALLOW_LOOPBACK=1 NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --recursive",
     "integration": "NODE_ENV=test _mocha --recursive test-integration/**",
     "linter": "eslint ./test/**/*.js ./lib/**/*.js ./index.js ./bin/**/*.js ./config/**/*.js",
@@ -89,9 +89,9 @@
     "ms": "^2.1.2",
     "rc": "^1.2.8",
     "readable-stream": "^3.4.0",
-    "redis": "^2.7.1",
+    "redis": "^3.1.0",
     "scrypt": "^6.0.3",
-    "secp256k1": "^3.7.1",
+    "secp256k1": "^4.0.2",
     "storj-analytics": "internxt/inxt-analytics",
     "storj-complex": "github:internxt/complex#v7.6.3-beta",
     "storj-lib": "github:internxt/core#v8.7.3-beta",

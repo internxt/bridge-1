@@ -166,8 +166,8 @@ describe('Farmer Authentication Middleware', function() {
         rawbody: Buffer.from('{"key": "value"}', 'utf8')
       };
       const sighash = auth.getSigHash(req);
-      const sigObj = secp256k1.sign(sighash, Buffer.from(privkey, 'hex'));
-      let sig = secp256k1.signatureExport(sigObj.signature).toString('hex');
+      const sigObj = secp256k1.ecdsaSign(sighash, Buffer.from(privkey, 'hex'));
+      let sig = Buffer.from(secp256k1.signatureExport(sigObj.signature)).toString('hex');
       req.headers['x-node-signature'] = sig;
       expect(auth.checkSig(req)).to.equal(true);
     });
@@ -193,8 +193,8 @@ describe('Farmer Authentication Middleware', function() {
         rawbody: Buffer.from('{"key": "value"}', 'utf8')
       };
       const sighash = auth.getSigHash(req);
-      const sigObj = secp256k1.sign(sighash, Buffer.from(privkey, 'hex'));
-      sig = secp256k1.signatureExport(sigObj.signature).toString('hex');
+      const sigObj = secp256k1.ecdsaSign(sighash, Buffer.from(privkey, 'hex'));
+      sig = Buffer.from(secp256k1.signatureExport(sigObj.signature)).toString('hex');
       // change the data so the signature fails
       timestamp = '1502390208009';
       expect(auth.checkSig(req)).to.equal(false);
