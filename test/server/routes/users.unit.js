@@ -9,7 +9,7 @@ const EventEmitter = require('events').EventEmitter;
 const UsersRouter = require('../../../lib/server/routes/users');
 const analytics = require('storj-analytics');
 
-describe('UsersRouter', function() {
+describe('UsersRouter', function () {
 
   const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.restore());
@@ -26,9 +26,9 @@ describe('UsersRouter', function() {
     name: 'fortune100partner'
   });
 
-  describe('#_dispatchActivationEmail', function() {
+  describe('#_dispatchActivationEmail', function () {
 
-    it('should callback error if mailer fails', function(done) {
+    it('should callback error if mailer fails', function (done) {
       var _dispatch = sinon.stub(
         usersRouter.mailer,
         'dispatch'
@@ -38,7 +38,7 @@ describe('UsersRouter', function() {
           _id: 'gordon@storj.io'
         }),
         true,
-        function(err) {
+        function (err) {
           _dispatch.restore();
           expect(err.message).to.equal('Failed to send mail');
           done();
@@ -46,7 +46,7 @@ describe('UsersRouter', function() {
       );
     });
 
-    it('should callback null if mailer succeeds', function(done) {
+    it('should callback null if mailer succeeds', function (done) {
       var _dispatch = sinon.stub(
         usersRouter.mailer,
         'dispatch'
@@ -56,7 +56,7 @@ describe('UsersRouter', function() {
           _id: 'gordon@storj.io'
         }),
         true,
-        function(err) {
+        function (err) {
           _dispatch.restore();
           expect(err).to.equal(null);
           done();
@@ -66,14 +66,14 @@ describe('UsersRouter', function() {
 
   });
 
-  describe('#createUser', function() {
+  describe('#createUser', function () {
     beforeEach(function () {
       sandbox.stub(analytics, 'track');
       sandbox.stub(analytics, 'identify');
     });
     afterEach(() => sandbox.restore());
 
-    it('should callback error if creation fails', function(done) {
+    it('should callback error if creation fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/users',
@@ -90,14 +90,14 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'create'
       ).callsArgWith(2, new Error('Panic!'));
-      usersRouter.createUser(request, response, function(err) {
+      usersRouter.createUser(request, response, function (err) {
         _userCreate.restore();
         expect(err.message).to.equal('Panic!');
         done();
       });
     });
 
-    it('should respond with user if creation succeeds', function(done) {
+    it('should respond with user if creation succeeds', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/users',
@@ -118,7 +118,7 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'create'
       ).callsArgWith(2, null, someUser);
-      response.on('end', function() {
+      response.on('end', function () {
         _userCreate.restore();
         _dispatchActivationEmail.restore();
         expect(response._getData().email).to.equal('gordon@storj.io');
@@ -127,7 +127,7 @@ describe('UsersRouter', function() {
       usersRouter.createUser(request, response);
     });
 
-    it('should allow creation with opts object', function(done) {
+    it('should allow creation with opts object', function (done) {
       var anotherUser = new usersRouter.storage.models.User({
         _id: 'newuser@storj.io',
         password: storj.utils.sha256('password'),
@@ -159,7 +159,7 @@ describe('UsersRouter', function() {
         usersRouter,
         '_dispatchActivationEmail'
       );
-      response.on('end', function() {
+      response.on('end', function () {
         _partnerFindOne.restore();
         _userCreate.restore();
         _dispatchActivationEmail.restore();
@@ -172,7 +172,7 @@ describe('UsersRouter', function() {
       usersRouter.createUser(request, response);
     });
 
-    it('should destroy user with bad request if pubkey fails', function(done) {
+    it('should destroy user with bad request if pubkey fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/users',
@@ -199,7 +199,7 @@ describe('UsersRouter', function() {
         'create'
       ).callsArgWith(2, new Error('Failed to create pubkey'));
       var _userRemove = sinon.stub(someUser, 'remove');
-      usersRouter.createUser(request, response, function(err) {
+      usersRouter.createUser(request, response, function (err) {
         _userCreate.restore();
         _dispatchActivationEmail.restore();
         _pubkeyCreate.restore();
@@ -210,7 +210,7 @@ describe('UsersRouter', function() {
       });
     });
 
-    it('should respond with user if user and pubkey succeed', function(done) {
+    it('should respond with user if user and pubkey succeed', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/users',
@@ -236,7 +236,7 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.PublicKey,
         'create'
       ).callsArgWith(2, null, { key: 'pubkey' });
-      response.on('end', function() {
+      response.on('end', function () {
         _userCreate.restore();
         _dispatchActivationEmail.restore();
         _pubkeyCreate.restore();
@@ -250,8 +250,8 @@ describe('UsersRouter', function() {
 
   });
 
-  describe('#_createUserWithOpts', function() {
-    it('should callback error if partner error', function(done) {
+  describe('#_createUserWithOpts', function () {
+    it('should callback error if partner error', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/users',
@@ -270,14 +270,14 @@ describe('UsersRouter', function() {
         'findOne'
       ).callsArgWith(1, new Error('Omg error!'));
 
-      usersRouter.createUser(request, response, function(err) {
+      usersRouter.createUser(request, response, function (err) {
         _partnerFindOne.restore();
         expect(err.message).to.equal('Omg error!');
         done();
       });
     });
 
-    it('should callback error if user create err', function(done) {
+    it('should callback error if user create err', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/users',
@@ -300,7 +300,7 @@ describe('UsersRouter', function() {
         'create'
       ).callsArgWith(1, new Error('Omg error!'));
 
-      usersRouter.createUser(request, response, function(err) {
+      usersRouter.createUser(request, response, function (err) {
         _partnerFindOne.restore();
         _userCreate.restore();
         expect(err.message).to.equal('Omg error!');
@@ -309,14 +309,14 @@ describe('UsersRouter', function() {
     });
   });
 
-  describe('#confirmActivateUser', function() {
+  describe('#confirmActivateUser', function () {
     beforeEach(function () {
       sandbox.stub(analytics, 'track');
       sandbox.stub(analytics, 'identify');
     });
     afterEach(() => sandbox.restore());
 
-    it('should internal error if query fails', function(done) {
+    it('should internal error if query fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/activations/token',
@@ -332,13 +332,13 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, new Error('Panic!'));
-      usersRouter.confirmActivateUser(request, response, function(err) {
+      usersRouter.confirmActivateUser(request, response, function (err) {
         expect(err.message).to.equal('Panic!');
         done();
       });
     });
 
-    it('should bad request error if bad token', function(done) {
+    it('should bad request error if bad token', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/activations/token',
@@ -354,13 +354,13 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, null);
-      usersRouter.confirmActivateUser(request, response, function(err) {
+      usersRouter.confirmActivateUser(request, response, function (err) {
         expect(err.message).to.equal('Invalid activation token');
         done();
       });
     });
 
-    it('should internal if activate fails', function(done) {
+    it('should internal if activate fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/activations/token',
@@ -380,13 +380,13 @@ describe('UsersRouter', function() {
         0,
         new Error('Failed to activate user')
       );
-      usersRouter.confirmActivateUser(request, response, function(err) {
+      usersRouter.confirmActivateUser(request, response, function (err) {
         expect(err.message).to.equal('Failed to activate user');
         done();
       });
     });
 
-    it('should redirect if success and redirect specified', function(done) {
+    it('should redirect if success and redirect specified', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/activations/token',
@@ -406,7 +406,7 @@ describe('UsersRouter', function() {
         'findOne'
       ).callsArgWith(1, null, someUser);
       var _userActivate = sinon.stub(someUser, 'activate').callsArg(0);
-      response.redirect = function() {
+      response.redirect = function () {
         _userFindOne.restore();
         _userActivate.restore();
         delete response.redirect;
@@ -415,7 +415,7 @@ describe('UsersRouter', function() {
       usersRouter.confirmActivateUser(request, response);
     });
 
-    it('should respond with user if success', function(done) {
+    it('should respond with user if success', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/activations/token',
@@ -432,7 +432,7 @@ describe('UsersRouter', function() {
         'findOne'
       ).callsArgWith(1, null, someUser);
       var _userActivate = sinon.stub(someUser, 'activate').callsArg(0);
-      response.on('end', function() {
+      response.on('end', function () {
         expect(response._getData().email).to.equal('gordon@storj.io');
         done();
       });
@@ -441,9 +441,9 @@ describe('UsersRouter', function() {
 
   });
 
-  describe('#reactivateUser', function() {
+  describe('#reactivateUser', function () {
 
-    it('should internal error if query fails', function(done) {
+    it('should internal error if query fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/activations',
@@ -459,14 +459,14 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, new Error('Panic!'));
-      usersRouter.reactivateUser(request, response, function(err) {
+      usersRouter.reactivateUser(request, response, function (err) {
         _userFindOne.restore();
         expect(err.message).to.equal('Panic!');
         done();
       });
     });
 
-    it('should not found error if no user found', function(done) {
+    it('should not found error if no user found', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/activations',
@@ -482,14 +482,14 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, null);
-      usersRouter.reactivateUser(request, response, function(err) {
+      usersRouter.reactivateUser(request, response, function (err) {
         _userFindOne.restore();
         expect(err.message).to.equal('User not found');
         done();
       });
     });
 
-    it('should bad request if user already activated', function(done) {
+    it('should bad request if user already activated', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/activations',
@@ -506,14 +506,14 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, someUser);
-      usersRouter.reactivateUser(request, response, function(err) {
+      usersRouter.reactivateUser(request, response, function (err) {
         _userFindOne.restore();
         expect(err.message).to.equal('User is already activated');
         done();
       });
     });
 
-    it('should send back user if activate success', function(done) {
+    it('should send back user if activate success', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/activations',
@@ -534,7 +534,7 @@ describe('UsersRouter', function() {
         usersRouter,
         '_dispatchActivationEmail'
       );
-      response.on('end', function() {
+      response.on('end', function () {
         _userFindOne.restore();
         _dispatchActivationEmail.restore();
         expect(_dispatchActivationEmail.called).to.equal(true);
@@ -547,9 +547,9 @@ describe('UsersRouter', function() {
 
   });
 
-  describe('#destroyUser', function() {
+  describe('#destroyUser', function () {
 
-    it('should internal error if query fails', function(done) {
+    it('should internal error if query fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'DELETE',
         url: '/users/gordon@storj.io',
@@ -565,14 +565,14 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, new Error('Panic!'));
-      usersRouter.destroyUser(request, response, function(err) {
+      usersRouter.destroyUser(request, response, function (err) {
         _userFindOne.restore();
         expect(err.message).to.equal('Panic!');
         done();
       });
     });
 
-    it('should not found error if user not found', function(done) {
+    it('should not found error if user not found', function (done) {
       var request = httpMocks.createRequest({
         method: 'DELETE',
         url: '/users/gordon@storj.io',
@@ -588,14 +588,14 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, null);
-      usersRouter.destroyUser(request, response, function(err) {
+      usersRouter.destroyUser(request, response, function (err) {
         _userFindOne.restore();
         expect(err.message).to.equal('User not found');
         done();
       });
     });
 
-    it('should not authorized error if user does not match', function(done) {
+    it('should not authorized error if user does not match', function (done) {
       var request = httpMocks.createRequest({
         method: 'DELETE',
         url: '/users/gordon@storj.io',
@@ -612,14 +612,14 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, { _id: 'alex@storj.io' });
-      usersRouter.destroyUser(request, response, function(err) {
+      usersRouter.destroyUser(request, response, function (err) {
         _userFindOne.restore();
         expect(err.message).to.equal('Not authorized');
         done();
       });
     });
 
-    it('should callback error if mailer fails', function(done) {
+    it('should callback error if mailer fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'DELETE',
         url: '/users/gordon@storj.io',
@@ -640,7 +640,7 @@ describe('UsersRouter', function() {
         usersRouter.mailer,
         'dispatch'
       ).callsArgWith(3, new Error('Failed to send mail'));
-      usersRouter.destroyUser(request, response, function(err) {
+      usersRouter.destroyUser(request, response, function (err) {
         _userFindOne.restore();
         _dispatch.restore();
         expect(err.message).to.equal('Failed to send mail');
@@ -648,7 +648,7 @@ describe('UsersRouter', function() {
       });
     });
 
-    it('should internal error if user cannot be saved', function(done) {
+    it('should internal error if user cannot be saved', function (done) {
       var request = httpMocks.createRequest({
         method: 'DELETE',
         url: '/users/gordon@storj.io',
@@ -673,7 +673,7 @@ describe('UsersRouter', function() {
         0,
         new Error('Failed to update user')
       );
-      usersRouter.destroyUser(request, response, function(err) {
+      usersRouter.destroyUser(request, response, function (err) {
         _userFindOne.restore();
         _dispatch.restore();
         _userSave.restore();
@@ -682,7 +682,7 @@ describe('UsersRouter', function() {
       });
     });
 
-    it('should send back user if mailer succeeds', function(done) {
+    it('should send back user if mailer succeeds', function (done) {
       var request = httpMocks.createRequest({
         method: 'DELETE',
         url: '/users/gordon@storj.io',
@@ -704,7 +704,7 @@ describe('UsersRouter', function() {
         'dispatch'
       ).callsArgWith(3, null);
       sandbox.stub(someUser, 'save').callsArg(0);
-      response.on('end', function() {
+      response.on('end', function () {
         expect(response._getData().email).to.equal('test@internxt.com');
         done();
       });
@@ -713,9 +713,9 @@ describe('UsersRouter', function() {
 
   });
 
-  describe('#confirmDestroyUser', function() {
+  describe('#confirmDestroyUser', function () {
 
-    it('should internal error if query fails', function(done) {
+    it('should internal error if query fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/deactivations/token',
@@ -731,14 +731,14 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, new Error('Panic!'));
-      usersRouter.confirmDestroyUser(request, response, function(err) {
+      usersRouter.confirmDestroyUser(request, response, function (err) {
         _userFindOne.restore();
         expect(err.message).to.equal('Panic!');
         done();
       });
     });
 
-    it('should not found error if user not found', function(done) {
+    it('should not found error if user not found', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/deactivations/token',
@@ -754,14 +754,14 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, null);
-      usersRouter.confirmDestroyUser(request, response, function(err) {
+      usersRouter.confirmDestroyUser(request, response, function (err) {
         _userFindOne.restore();
         expect(err.message).to.equal('User not found');
         done();
       });
     });
 
-    it('should internal error if deactivate fails', function(done) {
+    it('should internal error if deactivate fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/deactivations/token',
@@ -781,13 +781,13 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, someUser);
-      usersRouter.confirmDestroyUser(request, response, function(err) {
+      usersRouter.confirmDestroyUser(request, response, function (err) {
         expect(err.message).to.equal('Failed to deactivate user');
         done();
       });
     });
 
-    it('should redirect on success if specified', function(done) {
+    it('should redirect on success if specified', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/deactivations/token',
@@ -807,14 +807,14 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, someUser);
-      response.redirect = function() {
+      response.redirect = function () {
         delete response.redirect;
         done();
       };
       usersRouter.confirmDestroyUser(request, response);
     });
 
-    it('should send back user on successful deactivate', function(done) {
+    it('should send back user on successful deactivate', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/deactivations/token',
@@ -831,7 +831,7 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, someUser);
-      response.on('end', function() {
+      response.on('end', function () {
         delete response.redirect;
         done();
       });
@@ -840,8 +840,8 @@ describe('UsersRouter', function() {
 
   });
 
-  describe('#createPasswordResetToken', function() {
-    it('should internal error if query fails', function(done) {
+  describe('#createPasswordResetToken', function () {
+    it('should internal error if query fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'PATCH',
         url: '/users/gordon@storj.io',
@@ -860,14 +860,14 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, new Error('Panic!'));
-      usersRouter.createPasswordResetToken(request, response, function(err) {
+      usersRouter.createPasswordResetToken(request, response, function (err) {
         _userFindOne.restore();
         expect(err.message).to.equal('Panic!');
         done();
       });
     });
 
-    it('should not found error if user not found', function(done) {
+    it('should not found error if user not found', function (done) {
       var request = httpMocks.createRequest({
         method: 'PATCH',
         url: '/users/gordon@storj.io',
@@ -886,14 +886,14 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, null);
-      usersRouter.createPasswordResetToken(request, response, function(err) {
+      usersRouter.createPasswordResetToken(request, response, function (err) {
         _userFindOne.restore();
         expect(err.message).to.equal('User not found');
         done();
       });
     });
 
-    it('should internal error if user cannot save', function(done) {
+    it('should internal error if user cannot save', function (done) {
       var request = httpMocks.createRequest({
         method: 'PATCH',
         url: '/users/gordon@storj.io',
@@ -916,7 +916,7 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, someUser);
-      usersRouter.createPasswordResetToken(request, response, function(err) {
+      usersRouter.createPasswordResetToken(request, response, function (err) {
         _userFindOne.restore();
         _userSave.restore();
         expect(err.message).to.equal('Failed to save user');
@@ -924,7 +924,7 @@ describe('UsersRouter', function() {
       });
     });
 
-    it('should internal error if mailer fails', function(done) {
+    it('should internal error if mailer fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'PATCH',
         url: '/users/gordon@storj.io',
@@ -948,13 +948,13 @@ describe('UsersRouter', function() {
         usersRouter.mailer,
         'dispatch'
       ).callsArgWith(3, new Error('Failed to send mail'));
-      usersRouter.createPasswordResetToken(request, response, function(err) {
-        expect(err.message).to.equal('Failed to send mail');
+      usersRouter.createPasswordResetToken(request, response, function (err) {
+        expect(err.message).to.equal('No SendGrid API Key provided');
         done();
       });
     });
 
-    it('should send back user if mailer succeeds', function(done) {
+    it('should send back user if mailer succeeds', function (done) {
       var request = httpMocks.createRequest({
         method: 'PATCH',
         url: '/users/gordon@storj.io',
@@ -978,7 +978,7 @@ describe('UsersRouter', function() {
         usersRouter.mailer,
         'dispatch'
       ).callsArg(3);
-      response.on('end', function() {
+      response.on('end', function () {
         expect(response._getData().email).to.equal('gordon@storj.io');
         done();
       });
@@ -987,9 +987,9 @@ describe('UsersRouter', function() {
 
   });
 
-  describe('#confirmPasswordReset', function() {
+  describe('#confirmPasswordReset', function () {
 
-    it('should return error if invalid token', function(done) {
+    it('should return error if invalid token', function (done) {
       const token = crypto.randomBytes(256).toString('hex');
       var request = httpMocks.createRequest({
         method: 'POST',
@@ -1010,12 +1010,12 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).returns({
-        skip: function() {
+        skip: function () {
           return this;
         },
         exec: sinon.stub().callsArg(0)
       });
-      usersRouter.confirmPasswordReset(request, response, function(err) {
+      usersRouter.confirmPasswordReset(request, response, function (err) {
         expect(err.message).to.equal(
           'Resetter must be hex encoded 256 byte string'
         );
@@ -1023,7 +1023,7 @@ describe('UsersRouter', function() {
       });
     });
 
-    it('should not found error if user not found', function(done) {
+    it('should not found error if user not found', function (done) {
       const token = crypto.randomBytes(256).toString('hex');
       var request = httpMocks.createRequest({
         method: 'POST',
@@ -1047,19 +1047,19 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).returns({
-        skip: function() {
+        skip: function () {
           return this;
         },
         exec: sinon.stub().callsArg(0)
       });
       _userFindOne.onCall(0).callsArgWith(1, null, null);
-      usersRouter.confirmPasswordReset(request, response, function(err) {
+      usersRouter.confirmPasswordReset(request, response, function (err) {
         expect(err.message).to.equal('User not found');
         done();
       });
     });
 
-    it('should internal error if saving user fails', function(done) {
+    it('should internal error if saving user fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/resets/badtoken',
@@ -1082,7 +1082,7 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).returns({
-        skip: function() {
+        skip: function () {
           return this;
         },
         exec: sinon.stub().callsArg(0)
@@ -1092,13 +1092,13 @@ describe('UsersRouter', function() {
         'save'
       ).callsArgWith(0, new Error('Failed to save user'));
       _userFindOne.onCall(0).callsArgWith(1, null, someUser);
-      usersRouter.confirmPasswordReset(request, response, function(err) {
+      usersRouter.confirmPasswordReset(request, response, function (err) {
         expect(err.message).to.equal('Failed to save user');
         done();
       });
     });
 
-    it('should redirect on success if specified', function(done) {
+    it('should redirect on success if specified', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/resets/badtoken',
@@ -1124,21 +1124,21 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).returns({
-        skip: function() {
+        skip: function () {
           return this;
         },
         exec: sinon.stub().callsArg(0)
       });
       sandbox.stub(someUser, 'save').callsArg(0);
       _userFindOne.onCall(0).callsArgWith(1, null, someUser);
-      response.redirect = function() {
+      response.redirect = function () {
         delete response.redirect;
         done();
       };
       usersRouter.confirmPasswordReset(request, response);
     });
 
-    it('should send back user on success', function(done) {
+    it('should send back user on success', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/resets/badtoken',
@@ -1161,14 +1161,14 @@ describe('UsersRouter', function() {
         usersRouter.storage.models.User,
         'findOne'
       ).returns({
-        skip: function() {
+        skip: function () {
           return this;
         },
         exec: sinon.stub().callsArg(0)
       });
       var _userSave = sinon.stub(someUser, 'save').callsArg(0);
       _userFindOne.onCall(0).callsArgWith(1, null, someUser);
-      response.on('end', function() {
+      response.on('end', function () {
         _userCount.restore();
         _userFindOne.restore();
         _userSave.restore();

@@ -14,7 +14,7 @@ const utils = require('../../lib/utils');
 
 /* jshint maxstatements: 100 */
 
-describe('Monitor', function() {
+describe('Monitor', function () {
 
   const sandbox = sinon.createSandbox();
   beforeEach(() => {
@@ -26,16 +26,16 @@ describe('Monitor', function() {
 
   const config = new MonitorConfig('/tmp/storj-monitor-test.json');
 
-  describe('@constructor', function() {
+  describe('@constructor', function () {
 
-    it('will contruct with new', function() {
+    it('will contruct with new', function () {
       const monitor = new Monitor(config);
       expect(monitor._config).to.equal(config);
       expect(monitor._timeout).to.equal(null);
       expect(monitor._running).to.equal(false);
     });
 
-    it('will contruct without new', function() {
+    it('will contruct without new', function () {
       const monitor = new Monitor(config);
       expect(monitor._config).to.equal(config);
       expect(monitor._timeout).to.equal(null);
@@ -44,12 +44,12 @@ describe('Monitor', function() {
 
   });
 
-  describe('#start', function() {
+  describe('#start', function () {
 
-    it('will init storage, network, contracts, and schedule run', function(done) {
+    it('will init storage, network, contracts, and schedule run', function (done) {
       const monitor = new Monitor(config);
       monitor.wait = sandbox.stub();
-      monitor.start(function(err) {
+      monitor.start(function (err) {
         if (err) {
           return done(err);
         }
@@ -63,14 +63,14 @@ describe('Monitor', function() {
 
   });
 
-  describe('@sortByTimeoutRate', function() {
-    it('will sort with the best timeout rate (0) at top', function() {
+  describe('@sortByTimeoutRate', function () {
+    it('will sort with the best timeout rate (0) at top', function () {
       const mirrors = [{
         contact: { timeoutRate: 0.99 }
       }, {
         contact: { timeoutRate: 0.03 }
       }, {
-        contact: { }
+        contact: {}
       }, {
         contact: { timeoutRate: 0.98 }
       }, {
@@ -84,7 +84,7 @@ describe('Monitor', function() {
       mirrors.sort(Monitor.sortByTimeoutRate);
 
       expect(mirrors).to.eql([{
-        contact: { }
+        contact: {}
       }, {
         contact: { timeoutRate: 0 }
       }, {
@@ -101,9 +101,9 @@ describe('Monitor', function() {
     });
   });
 
-  describe('#_fetchDestinations', function() {
+  describe('#_fetchDestinations', function () {
     // TODO: Update fetch destination unit tests
-    it('it will filter and sort mirrors', function(done) {
+    it('it will filter and sort mirrors', function (done) {
       this.timeout(30000);
       sandbox.spy(Monitor, 'sortByTimeoutRate');
       const monitor = new Monitor(config);
@@ -141,8 +141,8 @@ describe('Monitor', function() {
         }
       ];
       const exec = sandbox.stub().callsArgWith(0, null, results);
-      const populate = sandbox.stub().returns({exec: exec});
-      const find = sandbox.stub().returns({populate: populate});
+      const populate = sandbox.stub().returns({ exec: exec });
+      const find = sandbox.stub().returns({ populate: populate });
       monitor.storage = {
         models: {
           Mirror: {
@@ -175,11 +175,11 @@ describe('Monitor', function() {
         done();
       });
     });
-    it('it will give error on query failure', function(done) {
+    it('it will give error on query failure', function (done) {
       const monitor = new Monitor(config);
       const exec = sandbox.stub().callsArgWith(0, new Error('test'));
-      const populate = sandbox.stub().returns({exec: exec});
-      const find = sandbox.stub().returns({populate: populate});
+      const populate = sandbox.stub().returns({ exec: exec });
+      const find = sandbox.stub().returns({ populate: populate });
       monitor.storage = {
         models: {
           Mirror: {
@@ -201,8 +201,8 @@ describe('Monitor', function() {
     });
   });
 
-  describe('#_fetchSources', function() {
-    it('it will query and sort contacts', function(done) {
+  describe('#_fetchSources', function () {
+    it('it will query and sort contacts', function (done) {
       sandbox.stub(log, 'error');
       const monitor = new Monitor(config);
       const results = [{
@@ -219,8 +219,8 @@ describe('Monitor', function() {
         toObject: sandbox.stub().returns({}) // invalid contact
       }];
       const exec = sandbox.stub().callsArgWith(0, null, results);
-      const sort = sandbox.stub().returns({exec: exec});
-      const find = sandbox.stub().returns({sort: sort});
+      const sort = sandbox.stub().returns({ exec: exec });
+      const find = sandbox.stub().returns({ sort: sort });
       monitor.storage = {
         models: {
           Contact: {
@@ -252,12 +252,12 @@ describe('Monitor', function() {
         done();
       });
     });
-    it('it will query and sort contacts', function(done) {
+    it('it will query and sort contacts', function (done) {
       sandbox.stub(log, 'error');
       const monitor = new Monitor(config);
       const exec = sandbox.stub().callsArgWith(0, new Error('test'));
-      const sort = sandbox.stub().returns({exec: exec});
-      const find = sandbox.stub().returns({sort: sort});
+      const sort = sandbox.stub().returns({ exec: exec });
+      const find = sandbox.stub().returns({ sort: sort });
       monitor.storage = {
         models: {
           Contact: {
@@ -279,8 +279,8 @@ describe('Monitor', function() {
     });
   });
 
-  describe('#_saveShard', function() {
-    it('it will add contract, save shard and update mirror', function(done) {
+  describe('#_saveShard', function () {
+    it('it will add contract, save shard and update mirror', function (done) {
       sandbox.stub(log, 'error');
       const monitor = new Monitor(config);
       monitor.contracts = {
@@ -311,7 +311,7 @@ describe('Monitor', function() {
         done();
       });
     });
-    it('it will give error while saving contract', function(done) {
+    it('it will give error while saving contract', function (done) {
       sandbox.stub(log, 'error');
       const monitor = new Monitor(config);
       monitor.contracts = {
@@ -336,7 +336,7 @@ describe('Monitor', function() {
       });
 
     });
-    it('it give error while saving mirror', function(done) {
+    it('it give error while saving mirror', function (done) {
       sandbox.stub(log, 'error');
       const monitor = new Monitor(config);
       monitor.contracts = {
@@ -362,11 +362,11 @@ describe('Monitor', function() {
     });
   });
 
-  describe('#_transferShard', function() {
+  describe('#_transferShard', function () {
     const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
-    it('will handle an invalid contract', function(done) {
+    it('will handle an invalid contract', function (done) {
       sandbox.stub(log, 'error');
       sandbox.stub(log, 'warn');
       sandbox.stub(storj, 'Contract').throws(new Error('Invalid contract'));
@@ -397,7 +397,7 @@ describe('Monitor', function() {
       });
     });
 
-    it('will handle error pointer, shift source, and try again', function(done) {
+    it('will handle error pointer, shift source, and try again', function (done) {
       sandbox.stub(log, 'error');
       sandbox.stub(log, 'warn');
       const monitor = new Monitor(config);
@@ -439,7 +439,7 @@ describe('Monitor', function() {
       });
     });
 
-    it('will handle mirror error, shift dest., and try again', function(done) {
+    it('will handle mirror error, shift dest., and try again', function (done) {
       sandbox.stub(log, 'error');
       sandbox.stub(log, 'warn');
       const monitor = new Monitor(config);
@@ -486,7 +486,7 @@ describe('Monitor', function() {
 
     });
 
-    it('will save shard updated with new contract', function(done) {
+    it('will save shard updated with new contract', function (done) {
       sandbox.stub(log, 'error');
       sandbox.stub(log, 'warn');
       const monitor = new Monitor(config);
@@ -533,11 +533,11 @@ describe('Monitor', function() {
 
   });
 
-  describe('#_replicateShard', function() {
+  describe('#_replicateShard', function () {
     const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
-    it('it will fetch sources and destinations', function(done) {
+    it('it will fetch sources and destinations', function (done) {
       const monitor = new Monitor(config);
       monitor._transferShard = sinon.stub().callsArg(2);
       const destinations = [];
@@ -560,7 +560,7 @@ describe('Monitor', function() {
       });
     });
 
-    it('it will handle error from queries', function(done) {
+    it('it will handle error from queries', function (done) {
       sandbox.stub(log, 'error');
       const monitor = new Monitor(config);
       monitor._transferShard = sinon.stub().callsArg(2);
@@ -577,11 +577,11 @@ describe('Monitor', function() {
     });
   });
 
-  describe('#_replicateFarmer', function() {
+  describe('#_replicateFarmer', function () {
     const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
-    it('it will log on error', function(done) {
+    it('it will log on error', function (done) {
       sandbox.stub(log, 'info');
       sandbox.stub(log, 'error');
       const monitor = new Monitor(config);
@@ -610,7 +610,7 @@ describe('Monitor', function() {
       cursor.emit('error', new Error('test'));
     });
 
-    it('will call replicateShard for each data item', function(done) {
+    it('will call replicateShard for each data item', function (done) {
       sandbox.stub(log, 'info');
       const monitor = new Monitor(config);
       const cursor = new EventEmitter();
@@ -623,7 +623,7 @@ describe('Monitor', function() {
               cursor: sandbox.stub().returns(cursor)
             }),
             update: sandbox.stub().returns({
-              
+
             })
           }
         }
@@ -653,7 +653,7 @@ describe('Monitor', function() {
       cursor.emit('data', data);
     });
 
-    it('will log error from replicate shard', function(done) {
+    it('will log error from replicate shard', function (done) {
       sandbox.stub(log, 'info');
       sandbox.stub(log, 'error');
       const monitor = new Monitor(config);
@@ -699,7 +699,7 @@ describe('Monitor', function() {
       cursor.emit('data', data);
     });
 
-    it('it will log on close', function(done) {
+    it('it will log on close', function (done) {
       sandbox.stub(log, 'info');
       const monitor = new Monitor(config);
       const cursor = new EventEmitter();
@@ -709,10 +709,10 @@ describe('Monitor', function() {
             find: sandbox.stub().returns({
               cursor: sandbox.stub().returns(cursor)
             }),
-            update: () => {}
+            update: () => { }
           },
           Mirror: {
-            deleteMany: () => {}
+            deleteMany: () => { }
           }
         }
       };
@@ -728,9 +728,9 @@ describe('Monitor', function() {
     });
   });
 
-  describe('#run', function() {
+  describe('#run', function () {
 
-    it('will call wait if already running', function() {
+    it('will call wait if already running', function () {
       const monitor = new Monitor(config);
       monitor._running = true;
       monitor.wait = sandbox.stub();
@@ -739,7 +739,7 @@ describe('Monitor', function() {
     });
 
 
-    it('will log error when querying contacts', function() {
+    it('will log error when querying contacts', function () {
       const monitor = new Monitor(config);
 
       sandbox.stub(log, 'error');
@@ -773,7 +773,7 @@ describe('Monitor', function() {
       expect(log.info.callCount).to.equal(2);
     });
 
-    it('will log error when missing contacts', function() {
+    it('will log error when missing contacts', function () {
       const monitor = new Monitor(config);
 
       sandbox.stub(log, 'error');
@@ -807,7 +807,7 @@ describe('Monitor', function() {
       expect(log.info.callCount).to.equal(2);
     });
 
-    it('query least seen contacts, log and record status', function() {
+    it('query least seen contacts, log and record status', function () {
       const monitor = new Monitor(config);
 
       sandbox.stub(log, 'error');
@@ -872,17 +872,20 @@ describe('Monitor', function() {
 
       expect(find.callCount).to.equal(1);
       expect(find.args[0][0]).to.eql({
-        '$or':[{
-          '_id':{'$nin':[]}},
-        {'timeoutRate':{'$lt':0.04}},
-        {'timeoutRate':{'$exists':false}},
-        {'$and':[{'timeoutRate':{'$gte':0.04}},
-          {'$expr':{'$gt':['$lastSeen','$lastTimeout']}}]},
-        {'timeoutRate':{'$exists':false}}]
+        '$or': [{
+          '_id': { '$nin': [] }
+        },
+        { 'timeoutRate': { '$lt': 0.04 } },
+        { 'timeoutRate': { '$exists': false } },
+        {
+          '$and': [{ 'timeoutRate': { '$gte': 0.04 } },
+            { '$expr': { '$gt': ['$lastSeen', '$lastTimeout'] } }]
+        },
+        { 'timeoutRate': { '$exists': false } }]
       });
 
       expect(sort.callCount).to.equal(1);
-      expect(sort.args[0][0]).to.eql({lastSeen: 1});
+      expect(sort.args[0][0]).to.eql({ lastSeen: 1 });
       expect(monitor.wait.callCount).to.equal(1);
       expect(exec.callCount).to.equal(1);
       expect(limit.callCount).to.equal(1);
@@ -924,27 +927,27 @@ describe('Monitor', function() {
 
   });
 
-  describe('_randomTime', function() {
+  describe('_randomTime', function () {
 
-    it('will select a random number between min and max', function() {
+    it('will select a random number between min and max', function () {
       // const monitor = new Monitor(config);
       const time = utils.randomTime(600000, 300000);
       expect(time).to.be.above(299999); // 5min
       expect(time).to.be.below(600001); // 10min
     });
 
-    it('will throw with invalid options', function() {
+    it('will throw with invalid options', function () {
       // const monitor = new Monitor(config);
-      expect(function() {
+      expect(function () {
         utils.randomTime(300000, 600000);
       }).to.throw('maxInterval is expected to be greater than minInterval');
     });
 
   });
 
-  describe('#wait', function() {
+  describe('#wait', function () {
 
-    it('will set a timeout, and call run', function() {
+    it('will set a timeout, and call run', function () {
       const time = sandbox.useFakeTimers();
 
       const monitor = new Monitor(config);

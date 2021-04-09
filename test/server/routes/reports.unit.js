@@ -10,19 +10,19 @@ const EventEmitter = require('events').EventEmitter;
 const ReportsRouter = require('../../../lib/server/routes/reports');
 const utils = require('../../../lib/utils');
 
-describe('ReportsRouter', function() {
+describe('ReportsRouter', function () {
 
   var reportsRouter = new ReportsRouter(
     require('../../_fixtures/router-opts')
   );
 
-  describe('#createExchangeReport', function() {
+  describe('#createExchangeReport', function () {
     var sandbox = sinon.createSandbox();
-    afterEach(function() {
+    afterEach(function () {
       sandbox.restore();
     });
 
-    it('should return internal error if save fails', function(done) {
+    it('should return internal error if save fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/reports/exchanges',
@@ -50,14 +50,14 @@ describe('ReportsRouter', function() {
         reportsRouter.storage.models.ExchangeReport.prototype,
         'save'
       ).callsArgWith(0, new Error('Failed to save report'));
-      reportsRouter.createExchangeReport(request, response, function(err) {
+      reportsRouter.createExchangeReport(request, response, function (err) {
         expect(err).to.be.instanceOf(errors.BadRequestError);
         expect(err.message).to.equal('Failed to save report');
         done();
       });
     });
 
-    it('should give error if datahash does not exist', function(done) {
+    it('should give error if datahash does not exist', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/reports/exchanges',
@@ -84,7 +84,7 @@ describe('ReportsRouter', function() {
         reportsRouter.storage.models.Shard,
         'find'
       ).callsArgWith(2, null, []);
-      reportsRouter.createExchangeReport(request, response, function(err) {
+      reportsRouter.createExchangeReport(request, response, function (err) {
         expect(err).to.be.instanceOf(errors.NotFoundError);
         var save = reportsRouter.storage.models.ExchangeReport.prototype.save;
         expect(save.callCount).to.equal(0);
@@ -92,7 +92,7 @@ describe('ReportsRouter', function() {
       });
     });
 
-    it('should give error if datahash does not exist', function(done) {
+    it('should give error if datahash does not exist', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/reports/exchanges',
@@ -119,7 +119,7 @@ describe('ReportsRouter', function() {
         reportsRouter.storage.models.Shard,
         'find'
       ).callsArgWith(2, null, null);
-      reportsRouter.createExchangeReport(request, response, function(err) {
+      reportsRouter.createExchangeReport(request, response, function (err) {
         expect(err).to.be.instanceOf(errors.NotFoundError);
         var save = reportsRouter.storage.models.ExchangeReport.prototype.save;
         expect(save.callCount).to.equal(0);
@@ -127,7 +127,7 @@ describe('ReportsRouter', function() {
       });
     });
 
-    it('should give error if datahash does not exist', function(done) {
+    it('should give error if datahash does not exist', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/reports/exchanges',
@@ -154,7 +154,7 @@ describe('ReportsRouter', function() {
         reportsRouter.storage.models.ExchangeReport.prototype,
         'save'
       ).callsArgWith(0, null);
-      reportsRouter.createExchangeReport(request, response, function(err) {
+      reportsRouter.createExchangeReport(request, response, function (err) {
         expect(err).to.be.instanceOf(errors.InternalError);
         var save = reportsRouter.storage.models.ExchangeReport.prototype.save;
         expect(save.callCount).to.equal(0);
@@ -162,7 +162,7 @@ describe('ReportsRouter', function() {
       });
     });
 
-    it('should send 201 if report saved', function(done) {
+    it('should send 201 if report saved', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/reports/exchanges',
@@ -189,7 +189,7 @@ describe('ReportsRouter', function() {
         reportsRouter.storage.models.ExchangeReport.prototype,
         'save'
       ).callsArgWith(0, null);
-      response.on('end', function() {
+      response.on('end', function () {
         expect(response.statusCode).to.equal(201);
         done();
       });
@@ -198,7 +198,7 @@ describe('ReportsRouter', function() {
 
   });
 
-  describe('#_handleExchangeReport', function() {
+  describe('#_handleExchangeReport', function () {
 
     let _triggerMirrorEstablish;
 
@@ -210,7 +210,7 @@ describe('ReportsRouter', function() {
     });
     after(() => _triggerMirrorEstablish.restore());
 
-    it('should callback error if not valid report type', function(done) {
+    it('should callback error if not valid report type', function (done) {
       reportsRouter._handleExchangeReport({
         shardHash: 'hash',
         exchangeResultMessage: 'NOT_VALID'
@@ -222,21 +222,21 @@ describe('ReportsRouter', function() {
       });
     });
 
-    it('should trigger a mirror on SHARD_UPLOADED', function(done) {
+    it('should trigger a mirror on SHARD_UPLOADED', function (done) {
       reportsRouter._handleExchangeReport({
         shardHash: 'hash',
         exchangeResultMessage: 'SHARD_UPLOADED'
       }, done);
     });
 
-    it('should trigger a mirror on MIRROR_SUCCESS', function(done) {
+    it('should trigger a mirror on MIRROR_SUCCESS', function (done) {
       reportsRouter._handleExchangeReport({
         shardHash: 'hash',
         exchangeResultMessage: 'MIRROR_SUCCESS'
       }, done);
     });
 
-    it('should trigger a mirror on DOWNLOAD_ERROR', function(done) {
+    it('should trigger a mirror on DOWNLOAD_ERROR', function (done) {
       reportsRouter._handleExchangeReport({
         shardHash: 'hash',
         exchangeResultMessage: 'DOWNLOAD_ERROR'
@@ -245,14 +245,14 @@ describe('ReportsRouter', function() {
 
   });
 
-  describe('@_sortByTimeoutRate', function() {
-    it('will sort with the best timeout rate (0) at top', function() {
+  describe('@_sortByTimeoutRate', function () {
+    it('will sort with the best timeout rate (0) at top', function () {
       const mirrors = [{
         contact: { timeoutRate: 0.99 }
       }, {
         contact: { timeoutRate: 0.03 }
       }, {
-        contact: { }
+        contact: {}
       }, {
         contact: { timeoutRate: 0.98 }
       }, {
@@ -266,7 +266,7 @@ describe('ReportsRouter', function() {
       mirrors.sort(ReportsRouter._sortByTimeoutRate);
 
       expect(mirrors).to.eql([{
-        contact: { }
+        contact: {}
       }, {
         contact: { timeoutRate: 0 }
       }, {
@@ -283,38 +283,38 @@ describe('ReportsRouter', function() {
     });
   });
 
-  describe('@_sortByResponseTime', function() {
-    it('will sort correctly with best response time at index 0', function() {
+  describe('@_sortByResponseTime', function () {
+    it('will sort correctly with best response time at index 0', function () {
       var available = [
-        { contact: { responseTime: 10100 }},
+        { contact: { responseTime: 10100 } },
         { contact: {} },
-        { contact: { responseTime: 100 }},
+        { contact: { responseTime: 100 } },
         { contact: {} },
-        { contact: { responseTime: 200 }},
-        { contact: { responseTime: 4100 }},
-        { contact: { responseTime: 2100 }}
+        { contact: { responseTime: 200 } },
+        { contact: { responseTime: 4100 } },
+        { contact: { responseTime: 2100 } }
       ];
       available.sort(ReportsRouter._sortByResponseTime);
       expect(available).to.eql([
-        { contact: { responseTime: 100 }},
-        { contact: { responseTime: 200 }},
-        { contact: { responseTime: 2100 }},
-        { contact: { responseTime: 4100 }},
-        { contact: { responseTime: 10100}},
-        { contact: {}},
-        { contact: {}}
+        { contact: { responseTime: 100 } },
+        { contact: { responseTime: 200 } },
+        { contact: { responseTime: 2100 } },
+        { contact: { responseTime: 4100 } },
+        { contact: { responseTime: 10100 } },
+        { contact: {} },
+        { contact: {} }
       ]);
     });
   });
 
-  describe('#_triggerMirrorEstablish', function() {
+  describe('#_triggerMirrorEstablish', function () {
     const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     const n = constants.M_REPLICATE;
     const hash = storj.utils.rmd160('');
 
-    it('should successfully replicate the shard', function(done) {
+    it('should successfully replicate the shard', function (done) {
       sandbox.spy(Array.prototype, 'sort');
       const mirrors = [
         new reportsRouter.storage.models.Mirror({
@@ -417,7 +417,7 @@ describe('ReportsRouter', function() {
         reportsRouter.contracts,
         'save'
       ).callsArgWith(1, null);
-      reportsRouter._triggerMirrorEstablish(n, hash, function(err) {
+      reportsRouter._triggerMirrorEstablish(n, hash, function (err) {
         expect(err).to.equal(null);
         expect(Array.prototype.sort.callCount).to.equal(1);
         expect(Array.prototype.sort.args[0][0])
@@ -426,7 +426,7 @@ describe('ReportsRouter', function() {
       });
     });
 
-    it('should error if net mirroring fails', function(done) {
+    it('should error if net mirroring fails', function (done) {
       var _mirrorFind = sinon.stub(
         reportsRouter.storage.models.Mirror,
         'find'
@@ -503,7 +503,7 @@ describe('ReportsRouter', function() {
         reportsRouter.contracts,
         'save'
       ).callsArgWith(1, null);
-      reportsRouter._triggerMirrorEstablish(n, hash, function(err) {
+      reportsRouter._triggerMirrorEstablish(n, hash, function (err) {
         _mirrorFind.restore();
         _contractsLoad.restore();
         _getContactById.restore();
@@ -515,7 +515,7 @@ describe('ReportsRouter', function() {
       });
     });
 
-    it('should error if no pointer can be retrieved', function(done) {
+    it('should error if no pointer can be retrieved', function (done) {
       var _mirrorFind = sinon.stub(
         reportsRouter.storage.models.Mirror,
         'find'
@@ -592,7 +592,7 @@ describe('ReportsRouter', function() {
         reportsRouter.contracts,
         'save'
       ).callsArgWith(1, null);
-      reportsRouter._triggerMirrorEstablish(n, hash, function(err) {
+      reportsRouter._triggerMirrorEstablish(n, hash, function (err) {
         _mirrorFind.restore();
         _contractsLoad.restore();
         _getContactById.restore();
@@ -604,7 +604,7 @@ describe('ReportsRouter', function() {
       });
     });
 
-    it('should error if no pointer can be retrieved', function(done) {
+    it('should error if no pointer can be retrieved', function (done) {
       var _mirrorFind = sinon.stub(
         reportsRouter.storage.models.Mirror,
         'find'
@@ -674,7 +674,7 @@ describe('ReportsRouter', function() {
         reportsRouter.contracts,
         'save'
       ).callsArgWith(1, null);
-      reportsRouter._triggerMirrorEstablish(n, hash, function(err) {
+      reportsRouter._triggerMirrorEstablish(n, hash, function (err) {
         _mirrorFind.restore();
         _contractsLoad.restore();
         _getContactById.restore();
@@ -685,7 +685,7 @@ describe('ReportsRouter', function() {
         done();
       });
     });
-    it('should error if the contract cannot load', function(done) {
+    it('should error if the contract cannot load', function (done) {
       var _mirrorFind = sinon.stub(
         reportsRouter.storage.models.Mirror,
         'find'
@@ -754,7 +754,7 @@ describe('ReportsRouter', function() {
         reportsRouter.contracts,
         'save'
       ).callsArgWith(1, null);
-      reportsRouter._triggerMirrorEstablish(n, hash, function(err) {
+      reportsRouter._triggerMirrorEstablish(n, hash, function (err) {
         _mirrorFind.restore();
         _contractsLoad.restore();
         _getContactById.restore();
@@ -766,7 +766,7 @@ describe('ReportsRouter', function() {
       });
     });
 
-    it('should error if the mirror limit is reached', function(done) {
+    it('should error if the mirror limit is reached', function (done) {
       var _mirrorFind = sinon.stub(
         reportsRouter.storage.models.Mirror,
         'find'
@@ -859,7 +859,7 @@ describe('ReportsRouter', function() {
         reportsRouter.contracts,
         'save'
       ).callsArgWith(1, null);
-      reportsRouter._triggerMirrorEstablish(2, hash, function(err) {
+      reportsRouter._triggerMirrorEstablish(2, hash, function (err) {
         _mirrorFind.restore();
         _contractsLoad.restore();
         _getContactById.restore();
@@ -871,7 +871,7 @@ describe('ReportsRouter', function() {
       });
     });
 
-    it('should error if no mirrors are available', function(done) {
+    it('should error if no mirrors are available', function (done) {
       var _mirrorFind = sinon.stub(
         reportsRouter.storage.models.Mirror,
         'find'
@@ -917,7 +917,7 @@ describe('ReportsRouter', function() {
         reportsRouter.contracts,
         'save'
       ).callsArgWith(1, null);
-      reportsRouter._triggerMirrorEstablish(n, hash, function(err) {
+      reportsRouter._triggerMirrorEstablish(n, hash, function (err) {
         _mirrorFind.restore();
         _contractsLoad.restore();
         _getContactById.restore();

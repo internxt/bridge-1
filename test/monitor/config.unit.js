@@ -5,7 +5,7 @@ const sinon = require('sinon');
 const expect = require('chai').expect;
 const MonitorConfig = require('../../lib/monitor/config');
 
-describe('Monitor Config', function() {
+describe('Monitor Config', function () {
 
   const sandbox = sinon.createSandbox();
   let readFileSync;
@@ -20,7 +20,7 @@ describe('Monitor Config', function() {
   });
   afterEach(() => sandbox.restore());
 
-  describe('@constructor', function() {
+  describe('@constructor', function () {
 
     function checkConfig(config) {
       expect(config);
@@ -34,14 +34,14 @@ describe('Monitor Config', function() {
       expect(config.application.pingConcurrency);
     }
 
-    it('will contruct with/without new', function() {
+    it('will contruct with/without new', function () {
       let config = new MonitorConfig('/tmp/storj-monitor-test.json');
       checkConfig(config);
       config = MonitorConfig('/tmp/storj-monitor-test.json');
       checkConfig(config);
     });
 
-    it('will get paths, setup and merge', function() {
+    it('will get paths, setup and merge', function () {
       readFileSync.restore();
       sandbox.stub(fs, 'readFileSync').returns(JSON.stringify({
         application: {
@@ -56,19 +56,19 @@ describe('Monitor Config', function() {
       expect(config.application.pingConcurrency).to.equal(100);
     });
 
-    it('will construct without args', function() {
+    it('will construct without args', function () {
       const config = new MonitorConfig();
       expect(config);
     });
 
-    it('will construct with environment variables', function() {
+    it('will construct with environment variables', function () {
       process.env.storjmonitor_logger__level = 1;
       const config = new MonitorConfig();
       delete process.env.storjmonitor_logger__level;
       expect(config.logger.level).to.equal(1);
     });
 
-    it('will construct with json environment variables', function() {
+    it('will construct with json environment variables', function () {
       const mongoOpts = {
         connectTimeoutMS: 123456,
         socketTimeoutMS: 123456,
@@ -80,7 +80,7 @@ describe('Monitor Config', function() {
       expect(config.storage.mongoOpts).to.eql(mongoOpts);
     });
 
-    it('json environment variables (boolean and numbers)', function() {
+    it('json environment variables (boolean and numbers)', function () {
       const mongoOpts = {
         connectTimeoutMS: 123456,
         socketTimeoutMS: 123456,
@@ -98,15 +98,15 @@ describe('Monitor Config', function() {
 
   });
 
-  describe('#getPaths', function() {
+  describe('#getPaths', function () {
 
-    it('will throw if not an absolute config path', function() {
-      expect(function() {
+    it('will throw if not an absolute config path', function () {
+      expect(function () {
         MonitorConfig.getPaths('tmp/storj-monitor-test.json');
       }).to.throw('confpath is expected to be absolute');
     });
 
-    it('will get the directory name from path', function() {
+    it('will get the directory name from path', function () {
       const paths = MonitorConfig.getPaths('/tmp/storj-monitor-test.json');
       expect(paths.confdir).to.equal('/tmp');
       expect(paths.confpath).to.equal('/tmp/storj-monitor-test.json');
@@ -114,7 +114,7 @@ describe('Monitor Config', function() {
 
   });
 
-  describe('#setupConfig', function() {
+  describe('#setupConfig', function () {
 
     const DEFAULTS = {
       storage: {
@@ -138,7 +138,7 @@ describe('Monitor Config', function() {
       }
     };
 
-    it('will make directory and create default config', function() {
+    it('will make directory and create default config', function () {
       MonitorConfig.setupConfig({
         confdir: '/tmp/storj',
         confpath: '/tmp/storj/storj-monitor-config-test.json'

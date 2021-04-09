@@ -7,15 +7,15 @@ const expect = require('chai').expect;
 const EventEmitter = require('events').EventEmitter;
 const ContactsRouter = require('../../../lib/server/routes/contacts');
 
-describe('ContactsRouter', function() {
+describe('ContactsRouter', function () {
 
   var contactsRouter = new ContactsRouter(
     require('../../_fixtures/router-opts')
   );
 
-  describe('#getContactList', function() {
+  describe('#getContactList', function () {
 
-    it('should return internal error if query fails', function(done) {
+    it('should return internal error if query fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/contacts',
@@ -32,19 +32,19 @@ describe('ContactsRouter', function() {
         contactsRouter.storage.models.Contact,
         'find'
       ).returns({
-        skip: function() { return this; },
-        limit: function() { return this; },
-        sort: function() { return this; },
+        skip: function () { return this; },
+        limit: function () { return this; },
+        sort: function () { return this; },
         exec: sinon.stub().callsArgWith(0, new Error('Panic!'))
       });
-      contactsRouter.getContactList(request, response, function(err) {
+      contactsRouter.getContactList(request, response, function (err) {
         _contactFind.restore();
         expect(err.message).to.equal('Panic!');
         done();
       });
     });
 
-    it('should return the sorted contact list', function(done) {
+    it('should return the sorted contact list', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/contacts',
@@ -72,15 +72,15 @@ describe('ContactsRouter', function() {
         contactsRouter.storage.models.Contact,
         'find'
       ).returns({
-        skip: function() { return this; },
-        limit: function() { return this; },
-        sort: function() { return this; },
+        skip: function () { return this; },
+        limit: function () { return this; },
+        sort: function () { return this; },
         exec: sinon.stub().callsArgWith(0, null, [
           contact1,
           contact2
         ])
       });
-      response.on('end', function() {
+      response.on('end', function () {
         var result = response._getData();
         _contactFind.restore();
         expect(result[0].nodeID).to.equal(storj.utils.rmd160('2'));
@@ -92,12 +92,12 @@ describe('ContactsRouter', function() {
 
   });
 
-  describe('#patchContactByNodeID', function() {
+  describe('#patchContactByNodeID', function () {
     const sandbox = sinon.createSandbox();
     sandbox.useFakeTimers(new Date(0).getTime());
     afterEach(() => sandbox.restore());
 
-    it('will send back a response on success', function(done) {
+    it('will send back a response on success', function (done) {
       var request = httpMocks.createRequest({
         method: 'PATCH',
         url: '/contacts/somenodeid',
@@ -126,7 +126,7 @@ describe('ContactsRouter', function() {
       sandbox.stub(contactsRouter, 'setDefaultResponseTime');
       sandbox.stub(contactsRouter, 'setDefaultReputation');
 
-      response.on('end', function() {
+      response.on('end', function () {
         var result = response._getData();
         expect(result).to.eql({
           nodeID: '13a01f6d2cda65982e452c841690ee32e6f88fb6',
@@ -150,13 +150,13 @@ describe('ContactsRouter', function() {
         done();
       });
 
-      contactsRouter.patchContactByNodeID(request, response, function() {});
+      contactsRouter.patchContactByNodeID(request, response, function () { });
     });
   });
 
-  describe('#getContactByNodeID', function() {
+  describe('#getContactByNodeID', function () {
 
-    it('should return internal error if query fails', function(done) {
+    it('should return internal error if query fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/contacts/somenodeid',
@@ -172,14 +172,14 @@ describe('ContactsRouter', function() {
         contactsRouter.storage.models.Contact,
         'findOne'
       ).callsArgWith(1, new Error('Panic!'));
-      contactsRouter.getContactByNodeID(request, response, function(err) {
+      contactsRouter.getContactByNodeID(request, response, function (err) {
         _contactFind.restore();
         expect(err.message).to.equal('Panic!');
         done();
       });
     });
 
-    it('should return not found error if no contact', function(done) {
+    it('should return not found error if no contact', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/contacts/' + storj.utils.rmd160('nodeid'),
@@ -195,14 +195,14 @@ describe('ContactsRouter', function() {
         contactsRouter.storage.models.Contact,
         'findOne'
       ).callsArgWith(1, null, null);
-      contactsRouter.getContactByNodeID(request, response, function(err) {
+      contactsRouter.getContactByNodeID(request, response, function (err) {
         _contactFind.restore();
         expect(err.message).to.equal('Contact not found');
         done();
       });
     });
 
-    it('should return the contact if found', function(done) {
+    it('should return the contact if found', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/contacts/somenodeid',
@@ -224,7 +224,7 @@ describe('ContactsRouter', function() {
         contactsRouter.storage.models.Contact,
         'findOne'
       ).callsArgWith(1, null, contact1);
-      response.on('end', function() {
+      response.on('end', function () {
         _contactFind.restore();
         expect(response._getData().nodeID).equal(contact1.nodeID);
         done();
