@@ -11,6 +11,9 @@ const analytics = require('storj-analytics');
 
 describe('UsersRouter', function() {
 
+  const sandbox = sinon.createSandbox();
+  afterEach(() => sandbox.restore());
+
   var usersRouter = new UsersRouter(
     require('../../_fixtures/router-opts')
   );
@@ -64,7 +67,6 @@ describe('UsersRouter', function() {
   });
 
   describe('#createUser', function() {
-    const sandbox = sinon.createSandbox();
     beforeEach(function () {
       sandbox.stub(analytics, 'track');
       sandbox.stub(analytics, 'identify');
@@ -308,7 +310,6 @@ describe('UsersRouter', function() {
   });
 
   describe('#confirmActivateUser', function() {
-    const sandbox = sinon.createSandbox();
     beforeEach(function () {
       sandbox.stub(analytics, 'track');
       sandbox.stub(analytics, 'identify');
@@ -327,12 +328,11 @@ describe('UsersRouter', function() {
         req: request,
         eventEmitter: EventEmitter
       });
-      var _userFindOne = sinon.stub(
+      sandbox.stub(
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, new Error('Panic!'));
       usersRouter.confirmActivateUser(request, response, function(err) {
-        _userFindOne.restore();
         expect(err.message).to.equal('Panic!');
         done();
       });
@@ -350,12 +350,11 @@ describe('UsersRouter', function() {
         req: request,
         eventEmitter: EventEmitter
       });
-      var _userFindOne = sinon.stub(
+      sandbox.stub(
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, null);
       usersRouter.confirmActivateUser(request, response, function(err) {
-        _userFindOne.restore();
         expect(err.message).to.equal('Invalid activation token');
         done();
       });
@@ -373,7 +372,7 @@ describe('UsersRouter', function() {
         req: request,
         eventEmitter: EventEmitter
       });
-      var _userFindOne = sinon.stub(
+      sandbox.stub(
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, someUser);
@@ -382,8 +381,6 @@ describe('UsersRouter', function() {
         new Error('Failed to activate user')
       );
       usersRouter.confirmActivateUser(request, response, function(err) {
-        _userFindOne.restore();
-        _userActivate.restore();
         expect(err.message).to.equal('Failed to activate user');
         done();
       });
@@ -404,7 +401,7 @@ describe('UsersRouter', function() {
         req: request,
         eventEmitter: EventEmitter
       });
-      var _userFindOne = sinon.stub(
+      sandbox.stub(
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, someUser);
@@ -430,14 +427,12 @@ describe('UsersRouter', function() {
         req: request,
         eventEmitter: EventEmitter
       });
-      var _userFindOne = sinon.stub(
+      sandbox.stub(
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, someUser);
       var _userActivate = sinon.stub(someUser, 'activate').callsArg(0);
       response.on('end', function() {
-        _userFindOne.restore();
-        _userActivate.restore();
         expect(response._getData().email).to.equal('gordon@storj.io');
         done();
       });
@@ -700,20 +695,17 @@ describe('UsersRouter', function() {
         req: request,
         eventEmitter: EventEmitter
       });
-      var _userFindOne = sinon.stub(
+      sandbox.stub(
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, someUser);
-      var _dispatch = sinon.stub(
+      sandbox.stub(
         usersRouter.mailer,
         'dispatch'
       ).callsArgWith(3, null);
-      var _userSave = sinon.stub(someUser, 'save').callsArg(0);
+      sandbox.stub(someUser, 'save').callsArg(0);
       response.on('end', function() {
-        _userFindOne.restore();
-        _dispatch.restore();
-        _userSave.restore();
-        expect(response._getData().email).to.equal('gordon@storj.io');
+        expect(response._getData().email).to.equal('test@internxt.com');
         done();
       });
       usersRouter.destroyUser(request, response);
@@ -781,17 +773,15 @@ describe('UsersRouter', function() {
         req: request,
         eventEmitter: EventEmitter
       });
-      var _deactivate = sinon.stub(someUser, 'deactivate').callsArgWith(
+      sandbox.stub(someUser, 'deactivate').callsArgWith(
         0,
         new Error('Failed to deactivate user')
       );
-      var _userFindOne = sinon.stub(
+      sandbox.stub(
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, someUser);
       usersRouter.confirmDestroyUser(request, response, function(err) {
-        _userFindOne.restore();
-        _deactivate.restore();
         expect(err.message).to.equal('Failed to deactivate user');
         done();
       });
@@ -812,14 +802,12 @@ describe('UsersRouter', function() {
         req: request,
         eventEmitter: EventEmitter
       });
-      var _deactivate = sinon.stub(someUser, 'deactivate').callsArg(0);
-      var _userFindOne = sinon.stub(
+      sandbox.stub(someUser, 'deactivate').callsArg(0);
+      sandbox.stub(
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, someUser);
       response.redirect = function() {
-        _userFindOne.restore();
-        _deactivate.restore();
         delete response.redirect;
         done();
       };
@@ -838,14 +826,12 @@ describe('UsersRouter', function() {
         req: request,
         eventEmitter: EventEmitter
       });
-      var _deactivate = sinon.stub(someUser, 'deactivate').callsArg(0);
-      var _userFindOne = sinon.stub(
+      sandbox.stub(someUser, 'deactivate').callsArg(0);
+      sandbox.stub(
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, someUser);
       response.on('end', function() {
-        _userFindOne.restore();
-        _deactivate.restore();
         delete response.redirect;
         done();
       });
@@ -953,19 +939,16 @@ describe('UsersRouter', function() {
         req: request,
         eventEmitter: EventEmitter
       });
-      var _userSave = sinon.stub(someUser, 'save').callsArg(0);
-      var _userFindOne = sinon.stub(
+      sandbox.stub(someUser, 'save').callsArg(0);
+      sandbox.stub(
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, someUser);
-      var _dispatch = sinon.stub(
+      sandbox.stub(
         usersRouter.mailer,
         'dispatch'
       ).callsArgWith(3, new Error('Failed to send mail'));
       usersRouter.createPasswordResetToken(request, response, function(err) {
-        _userFindOne.restore();
-        _userSave.restore();
-        _dispatch.restore();
         expect(err.message).to.equal('Failed to send mail');
         done();
       });
@@ -986,8 +969,8 @@ describe('UsersRouter', function() {
         req: request,
         eventEmitter: EventEmitter
       });
-      var _userSave = sinon.stub(someUser, 'save').callsArg(0);
-      var _userFindOne = sinon.stub(
+      sandbox.stub(someUser, 'save').callsArg(0);
+      sandbox.stub(
         usersRouter.storage.models.User,
         'findOne'
       ).callsArgWith(1, null, someUser);
@@ -996,9 +979,6 @@ describe('UsersRouter', function() {
         'dispatch'
       ).callsArg(3);
       response.on('end', function() {
-        _userFindOne.restore();
-        _userSave.restore();
-        _dispatch.restore();
         expect(response._getData().email).to.equal('gordon@storj.io');
         done();
       });
@@ -1022,11 +1002,11 @@ describe('UsersRouter', function() {
         req: request,
         eventEmitter: EventEmitter
       });
-      var _userCount = sinon.stub(
+      sandbox.stub(
         usersRouter.storage.models.User,
         'count'
       ).callsArgWith(1, null, 1);
-      var _userFindOne = sinon.stub(
+      sandbox.stub(
         usersRouter.storage.models.User,
         'findOne'
       ).returns({
@@ -1036,8 +1016,6 @@ describe('UsersRouter', function() {
         exec: sinon.stub().callsArg(0)
       });
       usersRouter.confirmPasswordReset(request, response, function(err) {
-        _userCount.restore();
-        _userFindOne.restore();
         expect(err.message).to.equal(
           'Resetter must be hex encoded 256 byte string'
         );
@@ -1061,11 +1039,11 @@ describe('UsersRouter', function() {
         req: request,
         eventEmitter: EventEmitter
       });
-      var _userCount = sinon.stub(
+      sandbox.stub(
         usersRouter.storage.models.User,
         'count'
       ).callsArgWith(1, null, 1);
-      var _userFindOne = sinon.stub(
+      const _userFindOne = sandbox.stub(
         usersRouter.storage.models.User,
         'findOne'
       ).returns({
@@ -1076,8 +1054,6 @@ describe('UsersRouter', function() {
       });
       _userFindOne.onCall(0).callsArgWith(1, null, null);
       usersRouter.confirmPasswordReset(request, response, function(err) {
-        _userCount.restore();
-        _userFindOne.restore();
         expect(err.message).to.equal('User not found');
         done();
       });
@@ -1098,11 +1074,11 @@ describe('UsersRouter', function() {
         req: request,
         eventEmitter: EventEmitter
       });
-      var _userCount = sinon.stub(
+      sandbox.stub(
         usersRouter.storage.models.User,
         'count'
       ).callsArgWith(1, null, 1);
-      var _userFindOne = sinon.stub(
+      const _userFindOne = sandbox.stub(
         usersRouter.storage.models.User,
         'findOne'
       ).returns({
@@ -1111,15 +1087,12 @@ describe('UsersRouter', function() {
         },
         exec: sinon.stub().callsArg(0)
       });
-      var _userSave = sinon.stub(
+      sandbox.stub(
         someUser,
         'save'
       ).callsArgWith(0, new Error('Failed to save user'));
       _userFindOne.onCall(0).callsArgWith(1, null, someUser);
       usersRouter.confirmPasswordReset(request, response, function(err) {
-        _userCount.restore();
-        _userFindOne.restore();
-        _userSave.restore();
         expect(err.message).to.equal('Failed to save user');
         done();
       });
@@ -1143,11 +1116,11 @@ describe('UsersRouter', function() {
         req: request,
         eventEmitter: EventEmitter
       });
-      var _userCount = sinon.stub(
+      sandbox.stub(
         usersRouter.storage.models.User,
         'count'
       ).callsArgWith(1, null, 1);
-      var _userFindOne = sinon.stub(
+      var _userFindOne = sandbox.stub(
         usersRouter.storage.models.User,
         'findOne'
       ).returns({
@@ -1156,12 +1129,9 @@ describe('UsersRouter', function() {
         },
         exec: sinon.stub().callsArg(0)
       });
-      var _userSave = sinon.stub(someUser, 'save').callsArg(0);
+      sandbox.stub(someUser, 'save').callsArg(0);
       _userFindOne.onCall(0).callsArgWith(1, null, someUser);
       response.redirect = function() {
-        _userCount.restore();
-        _userFindOne.restore();
-        _userSave.restore();
         delete response.redirect;
         done();
       };
