@@ -10,6 +10,7 @@ program
   .option('-w, --wallet <wallet_hash>', 'hash of the payment wallet whose nodes to be audited')
   .option('-n, --nodeId <node_id>', 'id of the node to be audited')
   .option('-h, --shardHash <node_id>', 'id of the shard to be audited')
+  .option('-f, --fileId <file_id>', 'id of the file whose shards are going to be audited')
   .option('-c, --config <path_to_config_file>', 'path to the config file')
   .option('-a, --attempts <attempts_to_retry>', 'number of attempts to audit the shard (sometimes nodes fail to send the shard)')
   .parse(process.argv);
@@ -28,6 +29,18 @@ function startMonitor () {
       .then((response) => {
         log.info('generating report');
         fs.writeFile(`./report_${program.wallet}.json`, JSON.stringify(response.nodesAudited) , 'utf-8');
+        log.info(`Finished. Overall health for nodes related to this wallet ${response.overallHealth}`);
+        process.exit(0);
+      })
+      .catch(log.warn);
+    return;
+  }
+
+  if(program.fileId) {
+    audit.file(program.fileId, 3)
+      .then((response) =>{
+        log.info('generating report');
+        fs.writeFile(`./report_file_${program.fileId}.json`, JSON.stringify(response) , 'utf-8');
         log.info(`Finished. Overall health for nodes related to this wallet ${response.overallHealth}`);
         process.exit(0);
       })
