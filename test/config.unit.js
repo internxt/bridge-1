@@ -45,6 +45,7 @@ describe('Config', function() {
       var config = new Config('__tmptest');
       delete config._;
       delete config.recursive;
+      delete config.exit;
       expect(JSON.stringify(config)).to.equal(JSON.stringify(Config.DEFAULTS));
     });
 
