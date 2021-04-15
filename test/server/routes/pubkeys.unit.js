@@ -8,7 +8,7 @@ const EventEmitter = require('events').EventEmitter;
 const PubkeysRouter = require('../../../lib/server/routes/pubkeys');
 const analytics = require('storj-analytics');
 
-describe('PubkeysRouter', function() {
+describe('PubkeysRouter', function () {
 
   var pubkeysRouter = new PubkeysRouter(
     require('../../_fixtures/router-opts')
@@ -18,9 +18,9 @@ describe('PubkeysRouter', function() {
     hashpass: storj.utils.sha256('password')
   });
 
-  describe('#getPublicKeys', function() {
+  describe('#getPublicKeys', function () {
 
-    it('should return internal error if query fails', function(done) {
+    it('should return internal error if query fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/keys'
@@ -34,14 +34,14 @@ describe('PubkeysRouter', function() {
         pubkeysRouter.storage.models.PublicKey,
         'find'
       ).callsArgWith(1, new Error('Panic!'));
-      pubkeysRouter.getPublicKeys(request, response, function(err) {
+      pubkeysRouter.getPublicKeys(request, response, function (err) {
         _pubkeyFind.restore();
         expect(err.message).to.equal('Panic!');
         done();
       });
     });
 
-    it('should return list of pubkeys', function(done) {
+    it('should return list of pubkeys', function (done) {
       var request = httpMocks.createRequest({
         method: 'GET',
         url: '/keys'
@@ -58,7 +58,7 @@ describe('PubkeysRouter', function() {
         new pubkeysRouter.storage.models.PublicKey({ _id: 'key1' }),
         new pubkeysRouter.storage.models.PublicKey({ _id: 'key2' })
       ]);
-      response.on('end', function() {
+      response.on('end', function () {
         var result = response._getData();
         _pubkeyFind.restore();
         expect(result).to.have.lengthOf(2);
@@ -69,12 +69,12 @@ describe('PubkeysRouter', function() {
 
   });
 
-  describe('#addPublicKey', function() {
+  describe('#addPublicKey', function () {
     const sandbox = sinon.createSandbox();
     beforeEach(() => sandbox.stub(analytics, 'track'));
     afterEach(() => sandbox.restore());
 
-    it('should return internal error if mongodb fails', function(done) {
+    it('should return internal error if mongodb fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/keys',
@@ -93,7 +93,7 @@ describe('PubkeysRouter', function() {
         pubkeysRouter.storage.models.PublicKey,
         'create'
       ).callsArgWith(3, internalError);
-      pubkeysRouter.addPublicKey(request, response, function(err) {
+      pubkeysRouter.addPublicKey(request, response, function (err) {
         _pubkeyCreate.restore();
         expect(err.code).to.equal(500);
         expect(err.message).to.equal('Panic!');
@@ -101,7 +101,7 @@ describe('PubkeysRouter', function() {
       });
     });
 
-    it('should return bad request if validation fails', function(done) {
+    it('should return bad request if validation fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/keys',
@@ -118,7 +118,7 @@ describe('PubkeysRouter', function() {
         pubkeysRouter.storage.models.PublicKey,
         'create'
       ).callsArgWith(3, new Error('Validation failed!'));
-      pubkeysRouter.addPublicKey(request, response, function(err) {
+      pubkeysRouter.addPublicKey(request, response, function (err) {
         _pubkeyCreate.restore();
         expect(err.code).to.equal(400);
         expect(err.message).to.equal('Validation failed!');
@@ -126,7 +126,7 @@ describe('PubkeysRouter', function() {
       });
     });
 
-    it('should return the created public key', function(done) {
+    it('should return the created public key', function (done) {
       var request = httpMocks.createRequest({
         method: 'POST',
         url: '/keys',
@@ -145,7 +145,7 @@ describe('PubkeysRouter', function() {
       ).callsArgWith(3, null, new pubkeysRouter.storage.models.PublicKey({
         _id: 'key1'
       }));
-      response.on('end', function() {
+      response.on('end', function () {
         _pubkeyCreate.restore();
         expect(response._getData().key).to.equal('key1');
         done();
@@ -155,12 +155,12 @@ describe('PubkeysRouter', function() {
 
   });
 
-  describe('#destroyPublicKey', function() {
+  describe('#destroyPublicKey', function () {
     const sandbox = sinon.createSandbox();
     beforeEach(() => sandbox.stub(analytics, 'track'));
     afterEach(() => sandbox.restore());
 
-    it('should return internal error if query fails', function(done) {
+    it('should return internal error if query fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'DELETE',
         url: '/keys/key1'
@@ -174,14 +174,14 @@ describe('PubkeysRouter', function() {
         pubkeysRouter.storage.models.PublicKey,
         'findOne'
       ).callsArgWith(1, new Error('Panic!'));
-      pubkeysRouter.destroyPublicKey(request, response, function(err) {
+      pubkeysRouter.destroyPublicKey(request, response, function (err) {
         _pubkeyFindOne.restore();
         expect(err.message).to.equal('Panic!');
         done();
       });
     });
 
-    it('should return not found if no public key', function(done) {
+    it('should return not found if no public key', function (done) {
       var request = httpMocks.createRequest({
         method: 'DELETE',
         url: '/keys/key1'
@@ -195,14 +195,14 @@ describe('PubkeysRouter', function() {
         pubkeysRouter.storage.models.PublicKey,
         'findOne'
       ).callsArgWith(1, null, null);
-      pubkeysRouter.destroyPublicKey(request, response, function(err) {
+      pubkeysRouter.destroyPublicKey(request, response, function (err) {
         _pubkeyFindOne.restore();
         expect(err.message).to.equal('Public key was not found');
         done();
       });
     });
 
-    it('should return internal error if remove fails', function(done) {
+    it('should return internal error if remove fails', function (done) {
       var request = httpMocks.createRequest({
         method: 'DELETE',
         url: '/keys/key1'
@@ -222,7 +222,7 @@ describe('PubkeysRouter', function() {
       ).callsArgWith(1, null, new pubkeysRouter.storage.models.PublicKey({
         _id: 'key1'
       }));
-      pubkeysRouter.destroyPublicKey(request, response, function(err) {
+      pubkeysRouter.destroyPublicKey(request, response, function (err) {
         _pubkeyFindOne.restore();
         _pubkeyRemove.restore();
         expect(err.message).to.equal('Panic!');
@@ -230,7 +230,7 @@ describe('PubkeysRouter', function() {
       });
     });
 
-    it('should return a 200 if delete succeeds', function(done) {
+    it('should return a 200 if delete succeeds', function (done) {
       var request = httpMocks.createRequest({
         method: 'DELETE',
         url: '/keys/key1'
@@ -250,7 +250,7 @@ describe('PubkeysRouter', function() {
       ).callsArgWith(1, null, new pubkeysRouter.storage.models.PublicKey({
         _id: 'key1'
       }));
-      response.on('end', function() {
+      response.on('end', function () {
         _pubkeyFindOne.restore();
         _pubkeyRemove.restore();
         expect(response.statusCode).to.equal(204);

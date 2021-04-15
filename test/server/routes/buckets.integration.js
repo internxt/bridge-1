@@ -7,11 +7,11 @@ const proxyquire = require('proxyquire');
 const expect = require('chai').expect;
 const Config = require('../../..').Config;
 
-describe('BucketsRouter Integration', function() {
+describe('BucketsRouter Integration', function () {
   const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.restore());
 
-  it('will give 400 error with bad object id', function(done) {
+  it('will give 400 error with bad object id', function (done) {
     sandbox.stub(console, 'info');
     sandbox.stub(console, 'error');
 
@@ -20,9 +20,9 @@ describe('BucketsRouter Integration', function() {
         Bucket: {}
       };
     }
-    function MockMailer() {}
+    function MockMailer() { }
     const MockComplex = {};
-    function MockMongoAdapter() {}
+    function MockMongoAdapter() { }
 
     const TestEngine = proxyquire('../../../lib/engine', {
       'storj-service-storage-models': MockStorage,
@@ -39,7 +39,7 @@ describe('BucketsRouter Integration', function() {
 
     sandbox.stub(storj, 'StorageManager').returns({});
 
-    engine.start(function(err) {
+    engine.start(function (err) {
       if (err) {
         return done(err);
       }

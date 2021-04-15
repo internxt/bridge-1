@@ -8,13 +8,13 @@ const pow = require('../../../lib/server/middleware/pow');
 
 const MAX = 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 
-describe('POW Middleware', function() {
+describe('POW Middleware', function () {
 
-  after(function(done) {
+  after(function (done) {
     redis.flushdb(done);
   });
 
-  describe('#getPOWMiddleware', function() {
+  describe('#getPOWMiddleware', function () {
     let challenge = '2db77b11eab714c46febb51a78d56d9b34b306d6fc46aa6e6e25a92b48eff4bf';
     let target = '00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 
@@ -23,13 +23,13 @@ describe('POW Middleware', function() {
 
     let unknownChallenge = '328bfdaa0d2bf6c3c6495f06ffc2087e0b092fa534f1dea699b88f11b0082ab2';
 
-    before(function() {
+    before(function () {
       redis.hset('contact-stats', 'count', 0);
       redis.set('contact-' + challenge, target, 'EX', 3600);
       redis.set('contact-' + challenge2, target2, 'EX', 3600);
     });
 
-    it('will get invalid pow error', function(done) {
+    it('will get invalid pow error', function (done) {
       let middleware = pow.getPOWMiddleware(redis);
 
       let req = {
@@ -40,7 +40,7 @@ describe('POW Middleware', function() {
       };
       let res = {};
 
-      middleware(req, res, function(err) {
+      middleware(req, res, function (err) {
         expect(err).to.be.instanceOf(Error);
         expect(err.message).to.equal('Invalid proof of work');
         done();
@@ -48,7 +48,7 @@ describe('POW Middleware', function() {
 
     });
 
-    it('will get unknown challenge error', function(done) {
+    it('will get unknown challenge error', function (done) {
       let middleware = pow.getPOWMiddleware(redis);
 
       let req = {
@@ -59,7 +59,7 @@ describe('POW Middleware', function() {
       };
       let res = {};
 
-      middleware(req, res, function(err) {
+      middleware(req, res, function (err) {
         expect(err).to.be.instanceOf(Error);
         expect(err.message).to.equal('Challenge not found');
         done();
@@ -67,7 +67,7 @@ describe('POW Middleware', function() {
 
     });
 
-    it('will increment count by one and remove challenge', function(done) {
+    it('will increment count by one and remove challenge', function (done) {
       let middleware = pow.getPOWMiddleware(redis);
 
       let req = {
@@ -78,18 +78,18 @@ describe('POW Middleware', function() {
       };
       let res = {};
 
-      middleware(req, res, function(err) {
+      middleware(req, res, function (err) {
         if (err) {
           return done(err);
         }
 
-        redis.hgetall('contact-stats', function(err, stats) {
+        redis.hgetall('contact-stats', function (err, stats) {
           if (err) {
             return done(err);
           }
           expect(stats.count).to.equal('1');
 
-          redis.get('contact-' + challenge2, function(err, target) {
+          redis.get('contact-' + challenge2, function (err, target) {
             if (err) {
               return done(err);
             }
@@ -102,16 +102,16 @@ describe('POW Middleware', function() {
     });
   });
 
-  describe('#checkInitTarget', function() {
+  describe('#checkInitTarget', function () {
     const sandbox = sinon.createSandbox();
-    beforeEach(function() {
+    beforeEach(function () {
       redis.del('contact-stats');
     });
     afterEach(() => {
       sandbox.restore();
     });
 
-    it('will init target if not set', function(done) {
+    it('will init target if not set', function (done) {
       sandbox.stub(pow, 'initTarget').callsArg(1);
       pow.checkInitTarget(redis, (err) => {
         if (err) {
@@ -123,10 +123,10 @@ describe('POW Middleware', function() {
     });
   });
 
-  describe('#initTarget', function() {
-    it('will set target to initial values', function(done) {
+  describe('#initTarget', function () {
+    it('will set target to initial values', function (done) {
       const initialTarget = 'fffffffffffffffffffffffffffffff' +
-            'fffffffffffffffffffffffffffffffff';
+        'fffffffffffffffffffffffffffffffff';
       pow.initTarget(redis, (err) => {
         if (err) {
           return done(err);
@@ -144,7 +144,7 @@ describe('POW Middleware', function() {
     });
   });
 
-  describe('#getTarget', function() {
+  describe('#getTarget', function () {
     let beginTime = 0;
     let clock = null;
     const count = 1000;
@@ -154,7 +154,7 @@ describe('POW Middleware', function() {
 
     const sandbox = sinon.createSandbox();
 
-    beforeEach(function() {
+    beforeEach(function () {
       clock = sandbox.useFakeTimers();
       beginTime = Date.now();
       redis.hset('contact-stats', 'timestamp', beginTime);
@@ -167,13 +167,13 @@ describe('POW Middleware', function() {
       clock.restore();
     });
 
-    it('it will adjust the difficulty (less)', function(done) {
+    it('it will adjust the difficulty (less)', function (done) {
       const opts = {
         retargetPeriod: 1000,
         retargetCount: 2000
       };
       clock.tick(1001);
-      pow.getTarget(redis, opts, function(err, target) {
+      pow.getTarget(redis, opts, function (err, target) {
         if (err) {
           return done(err);
         }
@@ -186,13 +186,13 @@ describe('POW Middleware', function() {
       });
     });
 
-    it('it will adjust the difficulty (more)', function(done) {
+    it('it will adjust the difficulty (more)', function (done) {
       const opts = {
         retargetPeriod: 1000,
         retargetCount: 500
       };
       clock.tick(1001);
-      pow.getTarget(redis, opts, function(err, target) {
+      pow.getTarget(redis, opts, function (err, target) {
         if (err) {
           return done(err);
         }
@@ -205,13 +205,13 @@ describe('POW Middleware', function() {
       });
     });
 
-    it('will not adjust the difficulty', function(done) {
+    it('will not adjust the difficulty', function (done) {
       const opts = {
         retargetPeriod: 1000,
         retargetCount: 500
       };
       clock.tick(999);
-      pow.getTarget(redis, opts, function(err, target) {
+      pow.getTarget(redis, opts, function (err, target) {
         if (err) {
           return done(err);
         }
@@ -224,7 +224,7 @@ describe('POW Middleware', function() {
       });
     });
 
-    it('will adjust from init stats', function(done) {
+    it('will adjust from init stats', function (done) {
       redis.hset('contact-stats', 'timestamp', 0);
       redis.hset('contact-stats', 'count', 0);
       redis.hset('contact-stats', 'target', MAX);
@@ -233,7 +233,7 @@ describe('POW Middleware', function() {
         retargetCount: 500
       };
       clock.tick(1504182357109);
-      pow.getTarget(redis, opts, function(err, target) {
+      pow.getTarget(redis, opts, function (err, target) {
         if (err) {
           return done(err);
         }
@@ -249,7 +249,7 @@ describe('POW Middleware', function() {
 
   });
 
-  describe('#getChallenge', function() {
+  describe('#getChallenge', function () {
     let beginTime = 0;
     let clock = null;
     const count = 1000;
@@ -260,7 +260,7 @@ describe('POW Middleware', function() {
       retargetCount: 500
     };
 
-    beforeEach(function() {
+    beforeEach(function () {
       clock = sandbox.useFakeTimers();
       beginTime = Date.now();
       redis.hset('contact-stats', 'timestamp', beginTime);
@@ -273,8 +273,8 @@ describe('POW Middleware', function() {
       clock.restore();
     });
 
-    it('will create a new challenge', function(done) {
-      pow.getChallenge(redis, opts, function(err, data) {
+    it('will create a new challenge', function (done) {
+      pow.getChallenge(redis, opts, function (err, data) {
         if (err) {
           return done(err);
         }
@@ -284,18 +284,18 @@ describe('POW Middleware', function() {
       });
     });
 
-    it('will handle error from getTarget', function(done) {
+    it('will handle error from getTarget', function (done) {
       sandbox.stub(pow, 'getTarget').callsArgWith(2, new Error('test'));
-      pow.getChallenge(redis, opts, function(err) {
+      pow.getChallenge(redis, opts, function (err) {
         expect(err).to.be.instanceOf(Error);
         expect(err.message).to.equal('test');
         done();
       });
     });
 
-    it('will handle error from db', function(done) {
+    it('will handle error from db', function (done) {
       sandbox.stub(redis, 'set').callsArgWith(4, new Error('test'));
-      pow.getChallenge(redis, opts, function(err) {
+      pow.getChallenge(redis, opts, function (err) {
         expect(err).to.be.instanceOf(Error);
         expect(err.message).to.equal('test');
         done();

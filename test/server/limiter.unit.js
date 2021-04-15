@@ -77,7 +77,7 @@ describe('Limiter', () => {
     expect(defaults.lookup(req)).to.eql(['127.0.0.3', '/test', 'GET']);
   });
 
-  it('should log json with url and ip', function(done) {
+  it('should log json with url and ip', function (done) {
     sandbox.stub(log, 'warn');
     const defaults = limiter.DEFAULTS();
     const req = {
@@ -113,7 +113,7 @@ describe('Limiter', () => {
       req: req,
       eventEmitter: EventEmitter
     });
-    const next = function() {
+    const next = function () {
       return errors.RateLimited('Too Many Requests');
     };
     const _log = sandbox.spy(log, 'warn');

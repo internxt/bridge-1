@@ -13,7 +13,7 @@ const http = require('http');
 const ms = require('ms');
 
 
-describe('ContractRenewalJob', function() {
+describe('ContractRenewalJob', function () {
 
   // Increase the timeout for these tests
   this.timeout(20000);
@@ -35,7 +35,7 @@ describe('ContractRenewalJob', function() {
 
   let storage, documents, landlord;
 
-  before(function(done) {
+  before(function (done) {
     landlord = http.createServer((req, res) => {
       return res.end(JSON.stringify({
         result: [null]
@@ -238,7 +238,7 @@ describe('ContractRenewalJob', function() {
     async.eachSeries(documents, (doc, next) => doc.save(next), done);
   });
 
-  it('should renew all contracts needed', function(done) {
+  it('should renew all contracts needed', function (done) {
     this.timeout(10000);
     function parseStderr(err) {
       let errLines = err.split('\n');
@@ -267,7 +267,7 @@ describe('ContractRenewalJob', function() {
     });
   });
 
-  after(function(done) {
+  after(function (done) {
     landlord.close();
     async.eachSeries(documents, (doc, next) => doc.remove(next), done);
   });

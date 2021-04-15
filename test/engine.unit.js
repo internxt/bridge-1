@@ -13,15 +13,15 @@ const Server = require('..').Server;
 const redis = require('redis');
 const EventEmitter = require('events').EventEmitter;
 
-describe('Engine', function() {
+describe('Engine', function () {
 
-  describe('@constructor', function() {
+  describe('@constructor', function () {
 
-    it('should create instance without the new keyword', function() {
+    it('should create instance without the new keyword', function () {
       expect(Engine(Config('__tmptest'))).to.be.instanceOf(Engine);
     });
 
-    it('should keep reference to config', function() {
+    it('should keep reference to config', function () {
       var config = Config('__tmptest');
       var engine = new Engine(config);
       expect(engine._config).to.equal(config);
@@ -29,11 +29,11 @@ describe('Engine', function() {
 
   });
 
-  describe('#_countPendingResponses', function() {
+  describe('#_countPendingResponses', function () {
     const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
-    it('will return pending count', function() {
+    it('will return pending count', function () {
       var config = Config('__tmptest');
       var engine = new Engine(config);
 
@@ -58,12 +58,12 @@ describe('Engine', function() {
     });
   });
 
-  describe('#_logHealthInfo', function() {
+  describe('#_logHealthInfo', function () {
     const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
     /* jshint ignore:start */ // ignore for too many function statements
-    it('will handle error', function() {
+    it('will handle error', function () {
       var config = Config('__tmptest');
       var engine = new Engine(config);
 
@@ -102,7 +102,7 @@ describe('Engine', function() {
     });
     /* jshint ignore:end */
 
-    it('will log health information', function() {
+    it('will log health information', function () {
       var config = Config('__tmptest');
       var engine = new Engine(config);
 
@@ -139,33 +139,33 @@ describe('Engine', function() {
 
   });
 
-  describe('#getSpecification', function() {
+  describe('#getSpecification', function () {
 
     var config = Config('__tmptest');
     var engine = new Engine(config);
 
-    it('should return the swagger specification', function() {
+    it('should return the swagger specification', function () {
       var spec = engine.getSpecification();
       expect(typeof spec).to.equal('object');
     });
 
-    it('should return the cached swagger specification', function() {
+    it('should return the cached swagger specification', function () {
       expect(engine._apispec).to.equal(engine.getSpecification());
     });
 
   });
 
-  describe('#start', function() {
+  describe('#start', function () {
     const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
-    it('should setup storage, mailer, server', function(done) {
+    it('should setup storage, mailer, server', function (done) {
       const clock = sandbox.useFakeTimers();
 
       var config = Config('__tmptest');
       var engine = new Engine(config);
       engine._logHealthInfo = sinon.stub();
-      engine.start(function(err) {
+      engine.start(function (err) {
         expect(err).to.equal(undefined);
         expect(engine.storage).to.be.instanceOf(Storage);
         expect(engine.mailer).to.be.instanceOf(Mailer);
@@ -174,7 +174,7 @@ describe('Engine', function() {
         expect(engine._healthInterval);
         clock.tick(Engine.HEALTH_INTERVAL + 10);
         expect(engine._logHealthInfo.callCount).to.equal(1);
-        engine.server.server.close(function() {
+        engine.server.server.close(function () {
           done();
         });
       });
@@ -187,7 +187,7 @@ describe('Engine', function() {
 
       const config = Config('__tmptest');
       const engine = new Engine(config);
-      engine.start(function() {
+      engine.start(function () {
         redisStub.emit('error', new Error('Test!'));
         expect(log.error.callCount).to.equal(1);
       });
@@ -195,11 +195,11 @@ describe('Engine', function() {
 
   });
 
-  describe('#_configureApp', function() {
+  describe('#_configureApp', function () {
     const sandbox = sinon.createSandbox();
     afterEach(() => sandbox.restore());
 
-    it('it should use middleware error handler', function(done) {
+    it('it should use middleware error handler', function (done) {
       const use = sandbox.stub();
       const express = sandbox.stub().returns({
         use: use,
@@ -208,7 +208,7 @@ describe('Engine', function() {
       const TestEngine = proxyquire('../lib/engine', {
         express: express
       });
-      const errorhandler = function(err, req, res, next) {
+      const errorhandler = function (err, req, res, next) {
         next();
       };
       sandbox.stub(middleware, 'errorhandler').returns(errorhandler);
@@ -223,13 +223,13 @@ describe('Engine', function() {
 
   });
 
-  describe('#_handleRootGET', function() {
+  describe('#_handleRootGET', function () {
 
-    it('should respond with the api specification', function(done) {
+    it('should respond with the api specification', function (done) {
       var config = Config('__tmptest');
       var engine = new Engine(config);
       engine._handleRootGET({}, {
-        send: function(content) {
+        send: function (content) {
           expect(content).to.equal(engine.getSpecification());
           done();
         }
@@ -238,13 +238,13 @@ describe('Engine', function() {
 
   });
 
-  describe('#_trackResponseStatus', function() {
+  describe('#_trackResponseStatus', function () {
 
-    it('should store reference to response', function(done) {
+    it('should store reference to response', function (done) {
       var engine = new Engine(Config('__tmptest'));
       var resp = {};
       var sock = {};
-      engine._trackResponseStatus({ socket: sock }, resp, function() {
+      engine._trackResponseStatus({ socket: sock }, resp, function () {
         var key = Object.keys(engine._pendingResponses)[0];
         expect(engine._pendingResponses[key][0]).to.equal(sock);
         expect(engine._pendingResponses[key][1]).to.equal(resp);
@@ -254,9 +254,9 @@ describe('Engine', function() {
 
   });
 
-  describe('#_keepPendingResponsesClean', function() {
+  describe('#_keepPendingResponsesClean', function () {
 
-    it('should delete responses that are finished', function(done) {
+    it('should delete responses that are finished', function (done) {
       var engine = new Engine(Config('__tmptest'));
       engine._pendingResponses = {
         one: [{ destroyed: false }, { finished: false }],
