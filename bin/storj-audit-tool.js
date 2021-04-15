@@ -168,7 +168,7 @@ stream.on('data', function (line) {
     if (err) {
       logger.error(err.message);
     }
-    if (streamEnded && contactCount == 0) {
+    if (streamEnded && contactCount === 0) {
       // THE END all contacts finished
       logger.info('done! finished running all contacts');
       closeProgram();
@@ -213,7 +213,7 @@ stream.on('data', function (line) {
 
       cursor.on('end', () => {
         shardCursorEnded = true;
-        if (shardCount[nodeID] == 0) {
+        if (shardCount[nodeID] === 0) {
           // THE END there were no shards
           next();
         }
@@ -271,7 +271,7 @@ stream.on('data', function (line) {
           // creating instance of storj.Contact and storj.Contract
           contact = storj.Contact(contact);
           const contractData = shard.contracts.filter((contract) => {
-            return contract.nodeID == nodeID;
+            return contract.nodeID === nodeID;
           })[0];
 
 
