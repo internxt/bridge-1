@@ -14,7 +14,7 @@ var config = new Config(program.config);
 
 var cleaner = new Cleaner(config);
 
-cleaner.start(function(err) {
+cleaner.start(function (err) {
   if (err) {
     console.log(err);
   }

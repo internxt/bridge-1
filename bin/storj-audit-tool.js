@@ -96,9 +96,13 @@ const statusInterval = setInterval(() => {
 }, 5 * 1000);
 
 // HELPER FUNCTIONS
-function sanitizeNodeID(a) { return a.replace(/'/g, ''); }
+function sanitizeNodeID(a) {
+  return a.replace(/'/g, '');
+}
 
-function toHexBuffer(a) { return Buffer.from(a, 'hex'); }
+function toHexBuffer(a) {
+  return Buffer.from(a, 'hex');
+}
 
 function closeProgram() {
   storage.connection.close();
@@ -153,7 +157,9 @@ stream.on('data', function (line) {
   contactCount++;
   logger.info('starting on a contact: %s, contractLimit: %s, running count: %d', nodeID, contractLimit, contactCount);
 
-  if (contactCount >= CONTACT_CONCURRENCY) { stream.pause(); }
+  if (contactCount >= CONTACT_CONCURRENCY) {
+    stream.pause();
+  }
 
   function contactFinish(err) {
     contactCount--;
@@ -228,6 +234,7 @@ stream.on('data', function (line) {
           // prevent double callback
           if (shardFinishedCalled) {
             shardFinishedCalled = true;
+
             return;
           }
           // make sure that the timeout callback isn't called
@@ -257,6 +264,7 @@ stream.on('data', function (line) {
               status: ERROR_CONTACT,
               contract: null
             };
+
             return shardFinish(new Error('contact not found: ' + nodeID));
           }
 
@@ -273,6 +281,7 @@ stream.on('data', function (line) {
               status: ERROR_CONTRACT,
               contract: null
             };
+
             return shardFinish(new Error('contract not found'));
           }
 
@@ -285,6 +294,7 @@ stream.on('data', function (line) {
                 status: ERROR_TOKEN,
                 contract: contract.toObject()
               };
+
               return shardFinish();
             }
 
@@ -339,6 +349,7 @@ stream.on('data', function (line) {
                     status: ERROR_STREAM,
                     contract: null
                   };
+
                   return shardFinish(error);
                 }
 

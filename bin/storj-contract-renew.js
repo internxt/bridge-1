@@ -35,8 +35,12 @@ renewal.on('counter-processed', () => {
   counter.processed++;
   logger.info('Contracts proccesed: %s, renewed: %s, errored: %s, total: %s, left: %s', counter.processed, counter.renewed, counter.errored, counter.total, counter.total - counter.processed);
 });
-renewal.on('counter-errored', () => { counter.errored++; });
-renewal.on('counter-renewed', ({ contact, contract }) => { logger.info('Renewed %s %s', contact.nodeID, contract.data_hash); counter.renewed++; });
+renewal.on('counter-errored', () => {
+  counter.errored++;
+});
+renewal.on('counter-renewed', ({ contact, contract }) => {
+  logger.info('Renewed %s %s', contact.nodeID, contract.data_hash); counter.renewed++;
+});
 renewal.on('counter-errors', ({ contact, contract, error }) => {
   logger.error('Error nodeID: %s, hash: %s, reason: %s', contact.nodeID, contract.data_hash, error.message);
   switch (error.message) {
@@ -52,7 +56,9 @@ renewal.on('counter-errors', ({ contact, contract, error }) => {
   }
 });
 
-renewal.on('end', () => { startRenewal(); });
+renewal.on('end', () => {
+  startRenewal();
+});
 
 function startRenewal() {
   renewal.initContractRenew((err) => {

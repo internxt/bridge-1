@@ -18,28 +18,29 @@ program
 /* SETUP */
 const config = new Config(process.env.NODE_ENV || 'develop', program.config, program.datadir);
 
-function startMonitor () {
+function startMonitor() {
   const audit = new Audit(config, program.attempts);
   audit.init();
 
   // Audit a wallet
-  if(program.wallet) {
+  if (program.wallet) {
     audit.wallet(program.wallet)
       .then((response) => {
         log.info('generating report');
-        fs.writeFile(`./report_${program.wallet}.json`, JSON.stringify(response.nodesAudited) , 'utf-8');
+        fs.writeFile(`./report_${program.wallet}.json`, JSON.stringify(response.nodesAudited), 'utf-8');
         log.info(`Finished. Overall health for nodes related to this wallet ${response.overallHealth}`);
         process.exit(0);
       })
       .catch(log.warn);
+
     return;
   }
 
 
-  if(program.nodeId) {
+  if (program.nodeId) {
     const attempts = program.attempts && !isNaN(program.attempts) ? program.attempts : 1;
 
-    if(program.shardHash) {
+    if (program.shardHash) {
       // Audit a shard
       log.info('Auditing a shard');
       audit.shard(program.shardHash, program.nodeId, attempts)
@@ -49,6 +50,7 @@ function startMonitor () {
           log.info(`Reason (if not healthy): ${result.reason}`);
         })
         .catch(console.log);
+
       return;
     } else {
       // Audit a node
@@ -60,6 +62,7 @@ function startMonitor () {
           console.log(result);
         })
         .catch(console.log);
+
       return;
     }
   } else {

@@ -14,7 +14,7 @@ program.parse(process.argv);
 var config = new Config(process.env.NODE_ENV || 'develop', program.config, program.datadir);
 var engine = new Engine(config);
 
-engine.start(function(err) {
+engine.start(function (err) {
   if (err) {
     console.log(err);
   }
