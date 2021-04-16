@@ -1,7 +1,7 @@
 Internxt Bridge
 =======================================================================================================
 
-[![Build Status](https://travis-ci.com/internxt/Bridge.svg?branch=master)](https://travis-ci.com/internxt/Bridge)
+[![Build Status](https://travis-ci.com/internxt/Bridge.svg?branch=master)](https://travis-ci.com/internxt/bridge)
 
 Quick Start
 -----------
@@ -9,7 +9,7 @@ Quick Start
 Install MongoDB, Git, Wget and build-essential:
 
 ```
-apt-get install mongodb redis-server git wget build-essential
+sudo apt install mongodb redis-server git wget build-essential
 ```
 
 Install [NVM][nvmsite], Node.js and NPM:
@@ -17,43 +17,29 @@ Install [NVM][nvmsite], Node.js and NPM:
 ```
 wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
 source ~/.profile
-nvm install 10.19
+nvm install 10.23
 ```
 
 Clone the repository, install dependencies:
 
 ```
-git clone https://github.com/Internxt/bridge.git && cd bridge
-npm install && npm link
+git clone https://github.com/internxt/bridge
+cd bridge
+npm install
+npm link
 ```
 
 Start the server (set the `NODE_ENV` environment variable to specify the config):
 
 ```
-NODE_ENV=develop internxt-bridge
+NODE_ENV=develop inxt-bridge
 ```
 
 > **Note:** Internxt Bridge cannot communicate with the network on it's own, but 
 > instead must communicate with a running 
-> [Internxt Complex](https://github.com/Internxt/complex) instance.
+> [Internxt Complex](https://github.com/internxt/complex) instance.
 
 This will use the configuration file located at `~/.inxt-bridge/config/develop.json`.
-
-Windows
--------
-
-Install utilizing automated script
-
-```
-https://github.com/Storj/storj-automation/archive/master.zip
-```
-
-The default configuration can be modified as needed.  It is located at
-
-```
-%USERPROFILE%\.inxt-bridge\config
-```
-
 
 Terms
 -----
