@@ -49,6 +49,7 @@
     "chai": "^4.2.0",
     "coveralls": "^2.11.6",
     "eslint": "^7.10.0",
+    "eslint-plugin-sonarjs": "^0.6.0",
     "gh-pages": "^2.1.1",
     "ink-docstrap": "github:boshevski/docstrap",
     "istanbul": "^0.4.1",

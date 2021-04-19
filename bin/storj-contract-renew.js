@@ -43,16 +43,13 @@ renewal.on('counter-renewed', ({ contact, contract }) => {
 });
 renewal.on('counter-errors', ({ contact, contract, error }) => {
   logger.error('Error nodeID: %s, hash: %s, reason: %s', contact.nodeID, contract.data_hash, error.message);
-  switch (error.message) {
-    case 'Invalid farmer contract':
-    // TODO: Should check shard issues and clean database if needed
-      break;
-    default:
-      if (error.message.includes('timed out')) {
+
+  if (error.message !== 'Invalid farmer contract') {
+    if (error.message.includes('timed out')) {
       // console.log('TIMEOUT')
-      } else {
-        console.log('Not handled: %s', error.message);
-      }
+    } else {
+      console.log('Not handled: %s', error.message);
+    }
   }
 });
 

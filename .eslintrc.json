@@ -6,7 +6,13 @@
         "es2021": true,
         "mocha": true
     },
-    "extends": "eslint:recommended",
+    "plugins": [
+        "sonarjs"
+    ],
+    "extends": [
+        "eslint:recommended",
+        "plugin:sonarjs/recommended"
+    ],
     "parserOptions": {
         "ecmaVersion": 12
     },
@@ -69,8 +75,29 @@
         "keyword-spacing": [
             "error"
         ],
-        "space-before-blocks": ["error", "always"],
-        "brace-style": [2, "1tbs", { "allowSingleLine": false }],
-        "newline-before-return": ["error"]
+        "space-before-blocks": [
+            "error",
+            "always"
+        ],
+        "brace-style": [
+            2,
+            "1tbs",
+            {
+                "allowSingleLine": false
+            }
+        ],
+        "newline-before-return": [
+            "error"
+        ],
+        "sonarjs/no-duplicate-string": [
+            "off"
+        ],
+        "sonarjs/cognitive-complexity": [
+            "warn",
+            15
+        ],
+        "sonarjs/no-identical-functions": [
+            "warn"
+        ]
     }
 }
