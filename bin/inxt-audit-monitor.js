@@ -19,7 +19,7 @@ program
 /* SETUP */
 const config = new Config(process.env.NODE_ENV || 'develop', program.config, program.datadir);
 
-function startMonitor () {
+function startMonitor() {
   const audit = new Audit(config, program.attempts);
   audit.init();
 
@@ -52,15 +52,12 @@ function startMonitor () {
     const attempts = program.attempts && !isNaN(program.attempts) ? program.attempts : 1;
 
     if(program.shardHash) {
-      // Audit a shard
-      log.info('Auditing a shard');
       audit.shardInNode(program.shardHash, program.nodeId, attempts)
-        .then((result) => {
-          const msg = `Audit finished. Tried ${attempts} times. Shard is ${result.healthy ? 'healthy' : 'not healthy'}.`;
-          log.info(msg);
-          log.info(`Reason (if not healthy): ${result.reason}`);
-        })
-        .catch(console.log);
+        .then(() => process.exit(0))
+        .catch((err) => {
+          log.error('Unexpected error during audit');
+          console.error(err);
+        });
       return;
     } else {
       // Audit a node
