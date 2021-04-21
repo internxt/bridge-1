@@ -48,14 +48,13 @@ function startMonitor () {
     return;
   }
 
-
   if(program.nodeId) {
     const attempts = program.attempts && !isNaN(program.attempts) ? program.attempts : 1;
 
     if(program.shardHash) {
       // Audit a shard
       log.info('Auditing a shard');
-      audit.shard(program.shardHash, program.nodeId, attempts)
+      audit.shardInNode(program.shardHash, program.nodeId, attempts)
         .then((result) => {
           const msg = `Audit finished. Tried ${attempts} times. Shard is ${result.healthy ? 'healthy' : 'not healthy'}.`;
           log.info(msg);
@@ -75,6 +74,11 @@ function startMonitor () {
         .catch(console.log);
       return;
     }
+  }
+  
+  // Audit only a shard
+  if (program.shardHash) {
+    audit.shard(program.shardHash, 3).catch(console.error);
   } else {
     log.error('please provide a valid option');
   }
