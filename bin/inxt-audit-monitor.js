@@ -1,7 +1,6 @@
 const Config = require('../lib/config');
 const program = require('commander');
 const log = require('../lib/logger');
-const fs = require('fs');
 
 const Audit = require('../lib/audit');
 
@@ -36,13 +35,11 @@ function startMonitor() {
 
   if(program.fileId) {
     audit.file(program.fileId, 3)
-      .then((response) =>{
-        log.info('generating report');
-        fs.writeFile(`./report_file_${program.fileId}.json`, JSON.stringify(response) , 'utf-8');
-        log.info(`Finished. Overall health for nodes related to this wallet ${response.overallHealth}`);
-        process.exit(0);
-      })
-      .catch(log.warn);
+      .then(() => process.exit(0))
+      .catch((err) => {
+        log.error('Unexpected error during audit');
+        console.error(err);
+      });
     return;
   }
 
@@ -70,7 +67,12 @@ function startMonitor() {
   
   // Audit only a shard
   if (program.shardHash) {
-    audit.shard(program.shardHash, 3).catch(console.error);
+    audit.shard(program.shardHash, 3)
+      .then(() => process.exit(0))
+      .catch((err) => {
+        log.error('Unexpected error during audit');
+        console.error(err);
+      });
   } else {
     log.error('please provide a valid option');
   }
