@@ -18,63 +18,48 @@ program
 /* SETUP */
 const config = new Config(process.env.NODE_ENV || 'develop', program.config, program.datadir);
 
-function startMonitor() {
+async function startMonitor() {
   const audit = new Audit(config, program.attempts);
   audit.init();
 
-  // Audit a wallet
-  if(program.wallet) {
-    audit.wallet(program.wallet)
-      .then(() => process.exit(0))
-      .catch((err) => {
-        log.error('Unexpected error during audit');
-        console.error(err);
-      });
-    return;
-  }
+  let exitCode = 0;
 
-  if(program.fileId) {
-    audit.file(program.fileId, 3)
-      .then(() => process.exit(0))
-      .catch((err) => {
-        log.error('Unexpected error during audit');
-        console.error(err);
-      });
-    return;
-  }
-
-  if(program.nodeId) {
-    const attempts = program.attempts && !isNaN(program.attempts) ? program.attempts : 1;
-
-    if(program.shardHash) {
-      audit.shardInNode(program.shardHash, program.nodeId, attempts)
-        .then(() => process.exit(0))
-        .catch((err) => {
-          log.error('Unexpected error during audit');
-          console.error(err);
-        });
-      return;
-    } else {
-      audit.node(program.nodeId)
-        .then(() => process.exit(0))
-        .catch((err) => {
-          log.error('Unexpected error during audit');
-          console.error(err);
-        });
+  try {
+    if (program.wallet) {
+      await audit.wallet(program.wallet);
       return;
     }
-  }
-  
-  // Audit only a shard
-  if (program.shardHash) {
-    audit.shard(program.shardHash, 3)
-      .then(() => process.exit(0))
-      .catch((err) => {
-        log.error('Unexpected error during audit');
-        console.error(err);
-      });
-  } else {
-    log.error('please provide a valid option');
+
+    if(program.fileId) {
+      await audit.file(program.fileId, 3);
+      return;
+    }  
+
+    if(program.nodeId) {
+      const attempts = program.attempts && !isNaN(program.attempts) ? program.attempts : 1;
+
+      if(program.shardHash) {
+        await audit.shardInNode(program.shardHash, program.nodeId, attempts);
+        return;
+      } else {
+        await audit.node(program.nodeId);
+        return;
+      }
+    }
+
+    if (program.shardHash) {
+      await audit.shard(program.shardHash, 3);
+      return;
+    }
+
+    log.warn('Wrong usage, use --help flag to see available options');
+  } catch (err) {
+    log.error('Unexpected error during audit');
+    console.error(err);
+
+    exitCode = -1;
+  } finally {
+    process.exit(exitCode);
   }
 }
 
