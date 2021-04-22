@@ -60,15 +60,12 @@ function startMonitor() {
         });
       return;
     } else {
-      // Audit a node
-      log.info('Auditing a node');
       audit.node(program.nodeId)
-        .then((result) => {
-          const msg = 'Audit finished';
-          log.info(msg);
-          console.log(result);
-        })
-        .catch(console.log);
+        .then(() => process.exit(0))
+        .catch((err) => {
+          log.error('Unexpected error during audit');
+          console.error(err);
+        });
       return;
     }
   }
