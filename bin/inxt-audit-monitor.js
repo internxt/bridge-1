@@ -26,13 +26,11 @@ function startMonitor() {
   // Audit a wallet
   if(program.wallet) {
     audit.wallet(program.wallet)
-      .then((response) => {
-        log.info('generating report');
-        fs.writeFile(`./report_${program.wallet}.json`, JSON.stringify(response.nodesAudited) , 'utf-8');
-        log.info(`Finished. Overall health for nodes related to this wallet ${response.overallHealth}`);
-        process.exit(0);
-      })
-      .catch(log.warn);
+      .then(() => process.exit(0))
+      .catch((err) => {
+        log.error('Unexpected error during audit');
+        console.error(err);
+      });
     return;
   }
 
