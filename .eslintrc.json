@@ -98,6 +98,7 @@
         ],
         "sonarjs/no-identical-functions": [
             "warn"
-        ]
+        ],
+        "complexity": ["error", 8]
     }
 }
