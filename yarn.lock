@@ -358,9 +358,9 @@
     "@types/node" "*"
 
 "@types/node@*", "@types/node@>=8.1.0":
-  version "15.12.4"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-15.12.4.tgz#e1cf817d70a1e118e81922c4ff6683ce9d422e26"
-  integrity sha512-zrNj1+yqYF4WskCMOHwN+w9iuD12+dGm0rQ35HLl9/Ouuq52cEtd0CH9qMgrdNmi5ejC1/V7vKEXYubB+65DkA==
+  version "15.12.5"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-15.12.5.tgz#9a78318a45d75c9523d2396131bd3cca54b2d185"
+  integrity sha512-se3yX7UHv5Bscf8f1ERKvQOD6sTyycH3hdaoozvaLxgUiY5lIGEeH37AD0G0Qi9kPqihPn0HOfd2yaIEN9VwEg==
 
 abbrev@1:
   version "1.1.1"
@@ -656,9 +656,9 @@ atbf@^1.1.0:
     bloem "^0.2.4"
 
 aws-sdk@^2.920.0:
-  version "2.934.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.934.0.tgz#1c26bd8ded15d2f6b2aa3301d35fc5daf1a61d68"
-  integrity sha512-k7p08ewrKcbs0ikCLFi9OI98Iv9dMND5244xPxUIjK5BLtuT/9Gr6eSCHfN70eCQyM5Y2xG1VJP6zhpkihu9Ew==
+  version "2.935.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.935.0.tgz#f122667a4b004d6cf5761e754d42f507b1fc36f7"
+  integrity sha512-OeoqkZ0fXPC1xjumoFQmPccASXmGBBNBsI3l9vs/NCQk3WyBfiYh07H6RO5owtCmp0a8hAjKSZAHjnRe2JlmEA==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -1053,9 +1053,9 @@ camelize@1.0.0:
   integrity sha1-FkpUg+Yw+kMh5a8HAg5TGDGyYJs=
 
 caniuse-lite@^1.0.30001219:
-  version "1.0.30001239"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001239.tgz#66e8669985bb2cb84ccb10f68c25ce6dd3e4d2b8"
-  integrity sha512-cyBkXJDMeI4wthy8xJ2FvDU6+0dtcZSJW3voUF8+e9f1bBeuvyZfc3PNbkOETyhbR+dGCPzn9E7MA3iwzusOhQ==
+  version "1.0.30001240"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001240.tgz#ec15d125b590602c8731545c5351ff054ad2d52f"
+  integrity sha512-nb8mDzfMdxBDN7ZKx8chWafAdBp5DAAlpWvNyUGe5tcDWd838zpzDN3Rah9cjCqhfOKkrvx40G2SDtP0qiWX/w==
 
 caseless@~0.11.0:
   version "0.11.0"
@@ -1867,9 +1867,9 @@ ee-first@1.1.1:
   integrity sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
 
 electron-to-chromium@^1.3.723:
-  version "1.3.758"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.758.tgz#0baeb8f0a89d1850cc65f92da5f669343e4f6241"
-  integrity sha512-StYtiDbgZdjcck3OLwsVVVif7QDuD5m5v2gF+XpETp5lHa7X0y3129YBlYaHRPyj1fep1oAaC6i//gAdp+rhbw==
+  version "1.3.759"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.759.tgz#b0d652d376831470a4c230ba721da2427bfb996a"
+  integrity sha512-nM76xH0t2FBH5iMEZDVc3S/qbdKjGH7TThezxC8k1Q7w7WHvIAyJh8lAe2UamGfdRqBTjHfPDn82LJ0ksCiB9g==
 
 elliptic@^6.3.2, elliptic@^6.5.0, elliptic@^6.5.2, elliptic@^6.5.3:
   version "6.5.4"
@@ -3957,9 +3957,9 @@ markdown-it@^10.0.0:
     uc.micro "^1.0.5"
 
 marked@^2.0.3:
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/marked/-/marked-2.1.2.tgz#59579e17b02443312caa1509994d5a0b18ae38e1"
-  integrity sha512-ueJhIvklJJw04qxQbGIAu63EXwwOCYc7yKMBjgagTM4rjC5QtWyqSNgW7jCosV1/Km/1TUfs5qEpAqcGG0Mo5g==
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-2.1.3.tgz#bd017cef6431724fd4b27e0657f5ceb14bff3753"
+  integrity sha512-/Q+7MGzaETqifOMWYEA7HVMaZb4XbcRfaOzcSsHZEith83KGlvaSG33u0SKu89Mj5h+T8V2hM+8O45Qc5XTgwA==
 
 md5.js@^1.3.4:
   version "1.3.5"
@@ -4205,9 +4205,9 @@ mongoose@=4.11.14:
     sliced "1.0.1"
 
 "mongoose@>= 1.0.16", mongoose@^5.10.4:
-  version "5.12.14"
-  resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-5.12.14.tgz#610460f0725acf67b3eefcd92f0a48a08919d51b"
-  integrity sha512-1lMRY8cfGYFWHqe5DLnVgNQDyD0fEbSoWIQe9Mllt/ZtayZ5XUFQt+o5VKrB44vsT5cLNzgwEFO0NvwTwqLluQ==
+  version "5.12.15"
+  resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-5.12.15.tgz#a023afa570c15a00d39315e7c7562c77ceed2857"
+  integrity sha512-GVvxE2/mbUsxAbTtleFlehCNMFlzcgKue/olukIpoN6iw1MYXKodf+ZIRndO+2jzlgbZgiHkAZZJbcFNt1DgHA==
   dependencies:
     "@types/mongodb" "^3.5.27"
     bson "^1.1.4"
@@ -5885,11 +5885,12 @@ storj-analytics@internxt/inxt-analytics:
 
 "storj-service-middleware@github:internxt/service-middleware":
   version "1.3.3"
-  resolved "https://codeload.github.com/internxt/service-middleware/tar.gz/beb6fb8851caf102706dd578b68516fd78f17972"
+  resolved "https://codeload.github.com/internxt/service-middleware/tar.gz/164748c669d19174151e7dc4ec4d9a7d6c63d77a"
   dependencies:
     basic-auth "^2.0.1"
     concat "^1.0.3"
     concat-stream "^2.0.0"
+    querystring "^0.2.1"
     redis "^3.1.0"
     secp256k1 "^4.0.0"
     storj-service-error-types "github:internxt/service-error-types"
@@ -6069,9 +6070,9 @@ strip-url-auth@^1.0.0:
   integrity sha1-IrD6OkE4WzO+PzMVUbu4N/oM164=
 
 stripe@^8.142.0, stripe@^8.49.0:
-  version "8.156.0"
-  resolved "https://registry.yarnpkg.com/stripe/-/stripe-8.156.0.tgz#040de551df88d71ef670a8c8d4df114c3fa6eb4b"
-  integrity sha512-q+bixlhaxnSI/Htk/iB1i5LhuZ557hL0pFgECBxQNhso1elxIsOsPOIXEuo3tSLJEb8CJSB7t/+Fyq6KP69tAQ==
+  version "8.157.0"
+  resolved "https://registry.yarnpkg.com/stripe/-/stripe-8.157.0.tgz#e885031ab955891286b79287886dc9983e209cd0"
+  integrity sha512-9GNtWEAeTO4D1V6yZl9hyyi0Zgz20uAtw8nwWrip3V0tEaJcKDL6IAqKssy5hqcDrkHNN3Wxa767D8Mcg7B/Yg==
   dependencies:
     "@types/node" ">=8.1.0"
     qs "^6.6.0"
@@ -6341,9 +6342,9 @@ uc.micro@^1.0.1, uc.micro@^1.0.5:
   integrity sha512-8Y75pvTYkLJW2hWQHXxoqRgV7qb9B+9vFEtidML+7koHUFapnVJAZ6cKs+Qjz5Aw3aZWHMC6u0wJE3At+nSGwA==
 
 uglify-js@^3.1.4:
-  version "3.13.9"
-  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.13.9.tgz#4d8d21dcd497f29cfd8e9378b9df123ad025999b"
-  integrity sha512-wZbyTQ1w6Y7fHdt8sJnHfSIuWeDgk6B5rCb4E/AM6QNNPbOMIZph21PW5dRB3h7Df0GszN+t7RuUH6sWK5bF0g==
+  version "3.13.10"
+  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.13.10.tgz#a6bd0d28d38f592c3adb6b180ea6e07e1e540a8d"
+  integrity sha512-57H3ACYFXeo1IaZ1w02sfA71wI60MGco/IQFjOqK+WtKoprh7Go2/yvd2HPtoJILO2Or84ncLccI4xoHMTSbGg==
 
 unbox-primitive@^1.0.1:
   version "1.0.1"
