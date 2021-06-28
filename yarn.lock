@@ -5897,7 +5897,7 @@ storj-analytics@internxt/inxt-analytics:
 
 "storj-service-storage-models@github:internxt/service-storage-models#10.6.1-beta":
   version "10.6.1-beta"
-  resolved "https://codeload.github.com/internxt/service-storage-models/tar.gz/8c700fc7e02d36a552c745a67e4c5776522f469b"
+  resolved "https://codeload.github.com/internxt/service-storage-models/tar.gz/40b300835dd18d9fe837b0271ffa888e18b323df"
   dependencies:
     bluebird "^3.4.7"
     coinpayments "^2.1.1"
